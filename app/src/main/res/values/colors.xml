@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="btn_udaciuos" type="color">#F08C35</item>
+    <item name="btn_accent" type="color">#E91E63</item>
+    <item name="txt_dark" type="color">#151515</item>
+    <item name="txt_light" type="color">#FFFFFF</item>
+    <item name="main_bg" type="color">#FFDFEAF1</item>
+</resources>

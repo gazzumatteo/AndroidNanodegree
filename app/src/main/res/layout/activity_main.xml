@@ -1,0 +1,77 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/main_bg"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/tv_main_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="@dimen/main_txt_margin"
+        android:text="@string/main_title"
+        android:textColor="@color/txt_dark"
+        android:textSize="@dimen/main_txt_title_size" />
+
+    <Button
+        android:id="@+id/btn_main_streamer"
+        style="@style/ButtonUdacious"
+        android:layout_width="@dimen/main_btn_width"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_main_title"
+        android:layout_centerHorizontal="true"
+        android:text="@string/btn_main_streamer"
+        android:textColor="@color/txt_dark" />
+
+    <Button
+        android:id="@+id/btn_main_scores"
+        style="@style/ButtonUdacious"
+        android:layout_width="@dimen/main_btn_width"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_main_streamer"
+        android:layout_centerHorizontal="true"
+        android:text="@string/btn_main_scores" />
+
+    <Button
+        android:id="@+id/btn_main_library"
+        style="@style/ButtonUdacious"
+        android:layout_width="@dimen/main_btn_width"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_main_scores"
+        android:layout_centerHorizontal="true"
+        android:text="@string/btn_main_library" />
+
+    <Button
+        android:id="@+id/btn_main_build_bigger"
+        style="@style/ButtonUdacious"
+        android:layout_width="@dimen/main_btn_width"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_main_library"
+        android:layout_centerHorizontal="true"
+        android:text="@string/btn_main_build_bigger" />
+
+    <Button
+        android:id="@+id/btn_main_xyz"
+        style="@style/ButtonUdacious"
+        android:layout_width="@dimen/main_btn_width"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_main_build_bigger"
+        android:layout_centerHorizontal="true"
+        android:text="@string/btn_main_xyz" />
+
+    <Button
+        android:id="@+id/btn_main_capstone"
+        style="@style/ButtonUdaciousAccented"
+        android:layout_width="@dimen/main_btn_width"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_main_xyz"
+        android:layout_centerHorizontal="true"
+        android:text="@string/btn_main_capstone" />
+</RelativeLayout>
