@@ -6,13 +6,11 @@
     </style>
 
     <style name="Button">
-
         <item name="android:minWidth">@dimen/main_btn_width</item>
         <item name="android:minHeight">50dp</item>
         <item name="android:layout_margin">@dimen/main_btn_margin</item>
-        <item name="android:elevation">2dp</item>
-        <item name="android:translationZ">2dp</item>
     </style>
+
     <style name="ButtonUdacious" parent="Button">
         <item name="android:background">@color/btn_udaciuos</item>
     </style>
