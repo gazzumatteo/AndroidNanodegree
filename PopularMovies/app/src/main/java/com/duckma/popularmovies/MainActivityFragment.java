@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 public class MainActivityFragment extends Fragment {
 
     public MainActivityFragment() {
+        
     }
 
     @Override
