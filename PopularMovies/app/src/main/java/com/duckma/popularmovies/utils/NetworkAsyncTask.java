@@ -50,7 +50,7 @@ public class NetworkAsyncTask extends AsyncTask<String, Integer, ArrayList<Movie
              *  CALL TO WS TO RETRIEVE MOVIES. BETTER TO USE VOLLEY OR RETROFIT
              */
             URL url = new URL(Config.BASE_URL + Config.DISCOVER_PATH + "?" + params[0] + "&api_key=" + Config.TMDB_API_KEY);
-
+            Log.d("DEBUG",Config.BASE_URL + Config.DISCOVER_PATH + "?" + params[0] + "&api_key=" + Config.TMDB_API_KEY);
             // Create the request to OpenWeatherMap, and open the connection
             mUrlConnection = (HttpURLConnection) url.openConnection();
             mUrlConnection.setRequestMethod("GET");

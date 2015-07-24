@@ -64,6 +64,7 @@ public class MainActivityFragment extends Fragment implements NetworkAsyncTask.N
                 mCallbacks.onItemSelected(mMovies.get(position));
             }
         });
+
     }
 
     @Override
@@ -97,7 +98,8 @@ public class MainActivityFragment extends Fragment implements NetworkAsyncTask.N
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (mActivatedPosition != -1) {
+        if (mActivatedPosition != GridView.INVALID_POSITION) {
+            Log.d("MAIN FRAGMENT", "Saved Position:" + mActivatedPosition);
             // Serialize and persist the activated item position.
             outState.putInt(STATE_ACTIVATED_POSITION, mActivatedPosition);
         }

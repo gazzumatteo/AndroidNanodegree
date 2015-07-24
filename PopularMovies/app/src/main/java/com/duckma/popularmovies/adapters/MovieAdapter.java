@@ -1,6 +1,7 @@
 package com.duckma.popularmovies.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,6 +47,11 @@ public class MovieAdapter extends BaseAdapter {
             holder = (ViewHolder) v.getTag();
         }
         MovieModel movie = mMovies.get(position);
+
+        if(v.isSelected()){
+            Log.d("View", "selected " + movie.getTitle());
+        }
+
 
 //      Decomment to use Picasso
         Picasso.with(mContext).load(movie.getPoster_path())
