@@ -15,9 +15,11 @@ import com.squareup.picasso.Picasso;
 
 public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncTask.NetworkDoneListener {
     public static final String ARG_ITEM_ID = "movie_id";
+    public static final String BUNDLE_ITEM = "downloaded_movie";
     private int mMovieId;
     TextView tvMovieTitle, tvYear, tvMovieLength, tvMovieScore, tvMovieDescription;
     ImageView ivMoviePoster;
+    MovieModel mMovie;
 
 
     public MovieDetailFragment() {
@@ -27,12 +29,18 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments().containsKey(ARG_ITEM_ID)) {
-            // Load the dummy content specified by the fragment
-            // arguments. In a real-world scenario, use a Loader
-            // to load content from a content provider.
+        if (savedInstanceState == null && getArguments().containsKey(ARG_ITEM_ID)) {
             mMovieId = getArguments().getInt(ARG_ITEM_ID);
             new NetworkDetailAsyncTask(this).execute(String.valueOf(mMovieId));
+        }
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        if (savedInstanceState != null && savedInstanceState.containsKey(BUNDLE_ITEM)) {
+            mMovie = (MovieModel) savedInstanceState.getSerializable(BUNDLE_ITEM);
+            populateFields();
         }
     }
 
@@ -56,14 +64,27 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
 
     @Override
     public void OnNetworkDone(MovieModel movie) {
+        mMovie = movie;
+        populateFields();
+    }
 
-        tvMovieTitle.setText(movie.getTitle());
-        Picasso.with(getActivity()).load(movie.getPoster_path())
+    private void populateFields() {
+        getActivity().setTitle(mMovie.getTitle());
+        tvMovieTitle.setText(mMovie.getTitle());
+        Picasso.with(getActivity()).load(mMovie.getPoster_path())
                 .placeholder(R.drawable.placeholder)
                 .into(ivMoviePoster);
-        tvYear.setText(movie.getRelease_date().substring(0, 4));
-        tvMovieLength.setText(movie.getRuntime() + "min");
-        tvMovieScore.setText(String.valueOf(movie.getVote_average()) + "/10");
-        tvMovieDescription.setText(movie.getOverview());
+        tvYear.setText(mMovie.getRelease_date().substring(0, 4));
+        tvMovieLength.setText(mMovie.getRuntime() + "min");
+        tvMovieScore.setText(String.valueOf(mMovie.getVote_average()) + "/10");
+        tvMovieDescription.setText(mMovie.getOverview());
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mMovie != null)
+            outState.putSerializable(BUNDLE_ITEM, mMovie);
+
     }
 }

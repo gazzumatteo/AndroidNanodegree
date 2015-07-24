@@ -20,10 +20,11 @@ import java.util.ArrayList;
  * A placeholder fragment containing a simple view.
  */
 public class MainActivityFragment extends Fragment implements NetworkListAsyncTask.NetworkDoneListener {
+    private static final String STATE_ACTIVATED_POSITION = "activated_position";
+    public static final String BUNDLE_ITEM = "downloaded_movies";
     private ArrayList<MovieModel> mMovies = new ArrayList<>();
     private MovieAdapter mAdapter;
     private GridView mGridView;
-    private static final String STATE_ACTIVATED_POSITION = "activated_position";
     private int mActivatedPosition = GridView.INVALID_POSITION;
 
     private ClickCallback mCallbacks = sDummyCallbacks;
@@ -42,9 +43,10 @@ public class MainActivityFragment extends Fragment implements NetworkListAsyncTa
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         // Restore the previously serialized activated item position.
-        if (savedInstanceState != null
-                && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
-            setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
+        if (savedInstanceState != null) {
+            mMovies = (ArrayList<MovieModel>) savedInstanceState.getSerializable(BUNDLE_ITEM);
+            if (savedInstanceState.containsKey(STATE_ACTIVATED_POSITION))
+                setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
         }
 
         mGridView = (GridView) view.findViewById(R.id.gridview);
@@ -78,7 +80,6 @@ public class MainActivityFragment extends Fragment implements NetworkListAsyncTa
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-
         // Activities containing this fragment must implement its callbacks.
         if (!(activity instanceof ClickCallback)) {
             throw new IllegalStateException("Activity must implement fragment's callbacks.");
@@ -98,6 +99,8 @@ public class MainActivityFragment extends Fragment implements NetworkListAsyncTa
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+
+        outState.putSerializable(BUNDLE_ITEM, mMovies);
         if (mActivatedPosition != GridView.INVALID_POSITION) {
             Log.d("MAIN FRAGMENT", "Saved Position:" + mActivatedPosition);
             // Serialize and persist the activated item position.

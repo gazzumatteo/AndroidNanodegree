@@ -19,7 +19,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         setContentView(R.layout.activity_main);
 
         mMainFragment = (MainActivityFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_container);
-        new NetworkListAsyncTask(mMainFragment).execute("sort_by=popularity.desc");
+
+        if (savedInstanceState == null) {
+            new NetworkListAsyncTask(mMainFragment).execute("sort_by=popularity.desc");
+        }
 
         if (findViewById(R.id.movie_detail_container) != null) {
             mTwoPane = true;
