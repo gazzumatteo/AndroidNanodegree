@@ -1,15 +1,15 @@
 package com.duckma.popularmovies.adapters;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
-import com.bumptech.glide.Glide;
 import com.duckma.popularmovies.R;
 import com.duckma.popularmovies.models.MovieModel;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -18,61 +18,66 @@ import java.util.ArrayList;
  * <p/>
  * Created by Matteo Gazzurelli on 24/07/15.
  */
-public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> {
+public class MovieAdapter extends BaseAdapter {
+
     private ArrayList<MovieModel> mMovies = new ArrayList<>();
     private Context mContext;
 
-    // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView mIvMoviePoster;
+    public MovieAdapter(Context context, ArrayList<MovieModel> objects) {
+        mContext = context;
+        mMovies = objects;
+    }
 
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        View v = convertView;
+        ViewHolder holder;
 
-        public ViewHolder(View v) {
-            super(v);
-            mIvMoviePoster = (ImageView) v.findViewById(R.id.ivMoviePoster);
+        if (v == null) {
+            LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            v = inflater.inflate(R.layout.movie_view, parent, false);
+            // cache view fields into the holder
+            holder = new ViewHolder();
+            holder.mIvMoviePoster = (ImageView) v.findViewById(R.id.ivMoviePoster);
+            // associate the holder with the view for later lookup
+            v.setTag(holder);
+        } else {
+            // view already exists, get the holder instance from the view
+            holder = (ViewHolder) v.getTag();
         }
-    }
-
-    // Provide a suitable constructor (depends on the kind of dataset)
-    public MovieAdapter(ArrayList<MovieModel> movies, Context context) {
-        this.mMovies = movies;
-        this.mContext = context;
-    }
-
-    // Create new views (invoked by the layout manager)
-    @Override
-    public MovieAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
-                                                      int viewType) {
-        // create a new view
-        View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.movie_view, parent, false);
-        // set the view's size, margins, paddings and layout parameters
-        ViewHolder vh = new ViewHolder(v);
-        return vh;
-    }
-
-    // Replace the contents of a view (invoked by the layout manager)
-    @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
         MovieModel movie = mMovies.get(position);
 
 //      Decomment to use Picasso
-//        Picasso.with(mContext).load(movie.getPoster_path())
+        Picasso.with(mContext).load(movie.getPoster_path())
+                .placeholder(R.drawable.placeholder)
+                .into(holder.mIvMoviePoster);
+
+//        Glide.with(mContext)
+//                .load(movie.getPoster_path())
 //                .placeholder(R.drawable.placeholder)
+//                .crossFade()
 //                .into(holder.mIvMoviePoster);
 
-        Glide.with(mContext)
-                .load(movie.getPoster_path())
-                .placeholder(R.drawable.placeholder)
-                .crossFade()
-                .into(holder.mIvMoviePoster);
+        return v;
     }
 
-    // Return the size of your dataset (invoked by the layout manager)
     @Override
-    public int getItemCount() {
+    public int getCount() {
         return mMovies.size();
     }
+
+    @Override
+    public Object getItem(int position) {
+        return mMovies.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return 0;
+    }
+
+    public static class ViewHolder {
+        ImageView mIvMoviePoster;
+    }
+
 }

@@ -2,14 +2,16 @@ package com.duckma.popularmovies.models;
 
 import com.duckma.popularmovies.Config;
 
+import java.io.Serializable;
+
 /**
  * Copyright © 2015 DuckMa S.r.l. - http://duckma.com
  * <p/>
  * Created by Matteo Gazzurelli on 23/07/15.
  */
-public class MovieModel {
+public class MovieModel implements Serializable{
 
-
+    boolean active;
     boolean adult;
     String backdrop_path;
     int[] genre_ids;
@@ -25,6 +27,13 @@ public class MovieModel {
     double vote_average;
     int vote_count;
 
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
     public boolean isAdult() {
         return adult;

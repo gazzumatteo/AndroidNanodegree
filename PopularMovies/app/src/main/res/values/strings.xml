@@ -2,4 +2,6 @@
     <string name="app_name">Pop Movies</string>
     <string name="action_filter_popular">Most Popular</string>
     <string name="action_filter_rated">Highest Rated</string>
+    <string name="title_item_list">Items</string>
+    <string name="title_item_detail">Item Detail</string>
 </resources>
