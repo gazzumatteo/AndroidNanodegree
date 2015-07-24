@@ -6,8 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.duckma.popularmovies.models.MovieModel;
-import com.duckma.popularmovies.utils.NetworkAsyncTask;
+import com.duckma.popularmovies.utils.NetworkListAsyncTask;
 
 public class MainActivity extends AppCompatActivity implements MainActivityFragment.ClickCallback {
     MainActivityFragment mMainFragment;
@@ -20,7 +19,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         setContentView(R.layout.activity_main);
 
         mMainFragment = (MainActivityFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_container);
-        new NetworkAsyncTask(mMainFragment).execute("sort_by=popularity.desc");
+        new NetworkListAsyncTask(mMainFragment).execute("sort_by=popularity.desc");
 
         if (findViewById(R.id.movie_detail_container) != null) {
             mTwoPane = true;
@@ -34,14 +33,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
      * indicating that the item with the given ID was selected.
      */
     @Override
-    public void onItemSelected(MovieModel movie) {
+    public void onItemSelected(int movieId) {
 
         if (mTwoPane) {
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a
             // fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putSerializable(MovieDetailFragment.ARG_ITEM_ID, movie);
+            arguments.putInt(MovieDetailFragment.ARG_ITEM_ID, movieId);
 
             MovieDetailFragment fragment = new MovieDetailFragment();
             fragment.setArguments(arguments);
@@ -53,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
             Intent detailIntent = new Intent(this, MovieDetailActivity.class);
-            detailIntent.putExtra(MovieDetailFragment.ARG_ITEM_ID, movie);
+            detailIntent.putExtra(MovieDetailFragment.ARG_ITEM_ID, movieId);
             startActivity(detailIntent);
         }
 
@@ -71,11 +70,11 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
         int id = item.getItemId();
         if (id == R.id.action_filter_popular) {
-            new NetworkAsyncTask(mMainFragment).execute("sort_by=popularity.desc");
+            new NetworkListAsyncTask(mMainFragment).execute("sort_by=popularity.desc");
             return true;
         }
         if (id == R.id.action_filter_rated) {
-            new NetworkAsyncTask(mMainFragment).execute("sort_by=vote_average.desc");
+            new NetworkListAsyncTask(mMainFragment).execute("sort_by=vote_average.desc");
             return true;
         }
 

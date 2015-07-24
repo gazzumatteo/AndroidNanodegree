@@ -10,8 +10,8 @@ Second exercise, an app that uses the apis of The Movie Database (https://www.th
 In order to execute this app you have to register to TMDB and *generate your own key*.
 
 Improved to be done:
-* Make a call to the tmdb (http://api.themoviedb.org/3/movie/[ID]?api_key=[API_KEY]) in order to get movie details
-* Populate the Detail View
+* Clean the UI
+* Submit
 
 
 Improved that can be done:

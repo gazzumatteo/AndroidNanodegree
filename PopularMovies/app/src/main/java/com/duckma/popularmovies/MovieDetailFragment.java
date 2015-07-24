@@ -9,12 +9,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.duckma.popularmovies.models.MovieModel;
+import com.duckma.popularmovies.utils.NetworkDetailAsyncTask;
 import com.squareup.picasso.Picasso;
 
 
-public class MovieDetailFragment extends Fragment {
-    public static final String ARG_ITEM_ID = "item_id";
-    private MovieModel mItem;
+public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncTask.NetworkDoneListener {
+    public static final String ARG_ITEM_ID = "movie_id";
+    private int mMovieId;
+    TextView tvMovieTitle, tvYear, tvMovieLength, tvMovieScore, tvMovieDescription;
+    ImageView ivMoviePoster;
+
 
     public MovieDetailFragment() {
     }
@@ -27,7 +31,8 @@ public class MovieDetailFragment extends Fragment {
             // Load the dummy content specified by the fragment
             // arguments. In a real-world scenario, use a Loader
             // to load content from a content provider.
-            mItem = (MovieModel) getArguments().getSerializable(ARG_ITEM_ID);
+            mMovieId = getArguments().getInt(ARG_ITEM_ID);
+            new NetworkDetailAsyncTask(this).execute(String.valueOf(mMovieId));
         }
     }
 
@@ -36,17 +41,29 @@ public class MovieDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
 
-        // Show the dummy content as text in a TextView.
-        if (mItem != null) {
-            ((TextView) rootView.findViewById(R.id.tvMovieTitle)).setText(mItem.getTitle());
-            ImageView ivMoviePoster = ((ImageView) rootView.findViewById(R.id.ivMoviePoster));
-            Picasso.with(getActivity()).load(mItem.getPoster_path())
-                    .placeholder(R.drawable.placeholder)
-                    .into(ivMoviePoster);
-            ((TextView) rootView.findViewById(R.id.tvYear)).setText(mItem.getRelease_date().substring(0, 4));
-//            ((TextView) rootView.findViewById(R.id.tvMovieLength)).setText(mItem.get);
+        if (mMovieId != -1) {
+            tvMovieTitle = ((TextView) rootView.findViewById(R.id.tvMovieTitle));
+            ivMoviePoster = ((ImageView) rootView.findViewById(R.id.ivMoviePoster));
+            tvYear = (TextView) rootView.findViewById(R.id.tvYear);
+            tvMovieLength = (TextView) rootView.findViewById(R.id.tvMovieLength);
+            tvMovieScore = (TextView) rootView.findViewById(R.id.tvMovieScore);
+            tvMovieDescription = (TextView) rootView.findViewById(R.id.tvMovieDescription);
         }
 
         return rootView;
+    }
+
+
+    @Override
+    public void OnNetworkDone(MovieModel movie) {
+
+        tvMovieTitle.setText(movie.getTitle());
+        Picasso.with(getActivity()).load(movie.getPoster_path())
+                .placeholder(R.drawable.placeholder)
+                .into(ivMoviePoster);
+        tvYear.setText(movie.getRelease_date().substring(0, 4));
+        tvMovieLength.setText(movie.getRuntime() + "min");
+        tvMovieScore.setText(String.valueOf(movie.getVote_average()) + "/10");
+        tvMovieDescription.setText(movie.getOverview());
     }
 }

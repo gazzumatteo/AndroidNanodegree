@@ -12,14 +12,14 @@ import android.widget.GridView;
 
 import com.duckma.popularmovies.adapters.MovieAdapter;
 import com.duckma.popularmovies.models.MovieModel;
-import com.duckma.popularmovies.utils.NetworkAsyncTask;
+import com.duckma.popularmovies.utils.NetworkListAsyncTask;
 
 import java.util.ArrayList;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment implements NetworkAsyncTask.NetworkDoneListener {
+public class MainActivityFragment extends Fragment implements NetworkListAsyncTask.NetworkDoneListener {
     private ArrayList<MovieModel> mMovies = new ArrayList<>();
     private MovieAdapter mAdapter;
     private GridView mGridView;
@@ -61,7 +61,7 @@ public class MainActivityFragment extends Fragment implements NetworkAsyncTask.N
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mCallbacks.onItemSelected(mMovies.get(position));
+                mCallbacks.onItemSelected(mMovies.get(position).getId());
             }
         });
 
@@ -134,7 +134,7 @@ public class MainActivityFragment extends Fragment implements NetworkAsyncTask.N
 
     private static ClickCallback sDummyCallbacks = new ClickCallback() {
         @Override
-        public void onItemSelected(MovieModel movie) {
+        public void onItemSelected(int id) {
         }
     };
 
@@ -142,6 +142,6 @@ public class MainActivityFragment extends Fragment implements NetworkAsyncTask.N
         /**
          * Callback for when an item has been selected.
          */
-        void onItemSelected(MovieModel movie);
+        void onItemSelected(int id);
     }
 }

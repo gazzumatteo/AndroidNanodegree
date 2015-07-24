@@ -9,7 +9,7 @@ import java.io.Serializable;
  * <p/>
  * Created by Matteo Gazzurelli on 23/07/15.
  */
-public class MovieModel implements Serializable{
+public class MovieModel implements Serializable {
 
     boolean active;
     boolean adult;
@@ -23,6 +23,7 @@ public class MovieModel implements Serializable{
     String poster_path;
     double popularity;
     String title;
+    String runtime;
     boolean video;
     double vote_average;
     int vote_count;
@@ -146,4 +147,13 @@ public class MovieModel implements Serializable{
     public void setVote_count(int vote_count) {
         this.vote_count = vote_count;
     }
+
+    public String getRuntime() {
+        return runtime;
+    }
+
+    public void setRuntime(String runtime) {
+        this.runtime = runtime;
+    }
+
 }

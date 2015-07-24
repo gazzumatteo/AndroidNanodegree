@@ -23,7 +23,7 @@ import java.util.ArrayList;
  * <p/>
  * Created by Matteo Gazzurelli on 23/07/15.
  */
-public class NetworkAsyncTask extends AsyncTask<String, Integer, ArrayList<MovieModel>> {
+public class NetworkListAsyncTask extends AsyncTask<String, Integer, ArrayList<MovieModel>> {
 
 
     private HttpURLConnection mUrlConnection = null;
@@ -33,7 +33,7 @@ public class NetworkAsyncTask extends AsyncTask<String, Integer, ArrayList<Movie
     public NetworkDoneListener networkDoneListener;
     ArrayList<MovieModel> mMovies = new ArrayList<>();
 
-    public NetworkAsyncTask(NetworkDoneListener networkDoneListener) {
+    public NetworkListAsyncTask(NetworkDoneListener networkDoneListener) {
         this.networkDoneListener = networkDoneListener;
     }
 
@@ -51,6 +51,7 @@ public class NetworkAsyncTask extends AsyncTask<String, Integer, ArrayList<Movie
              */
             URL url = new URL(Config.BASE_URL + Config.DISCOVER_PATH + "?" + params[0] + "&api_key=" + Config.TMDB_API_KEY);
             Log.d("DEBUG",Config.BASE_URL + Config.DISCOVER_PATH + "?" + params[0] + "&api_key=" + Config.TMDB_API_KEY);
+
             // Create the request to OpenWeatherMap, and open the connection
             mUrlConnection = (HttpURLConnection) url.openConnection();
             mUrlConnection.setRequestMethod("GET");
