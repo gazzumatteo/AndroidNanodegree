@@ -115,6 +115,12 @@ public class MainActivityFragment extends Fragment implements NetworkAsyncTask.N
                 : GridView.CHOICE_MODE_NONE);
     }
 
+    public void setTwoPaneMode() {
+        // When setting CHOICE_MODE_SINGLE, ListView will automatically
+        // give items the 'activated' state when touched.
+        mGridView.setNumColumns(3);
+    }
+
     private void setActivatedPosition(int position) {
         if (position == GridView.INVALID_POSITION) {
             mGridView.setItemChecked(mActivatedPosition, false);

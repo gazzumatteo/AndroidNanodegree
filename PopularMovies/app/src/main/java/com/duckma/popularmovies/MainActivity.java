@@ -3,7 +3,6 @@ package com.duckma.popularmovies;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -20,22 +19,15 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // populate the first fragment
-        mMainFragment = new MainActivityFragment();
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.fragment_container, mMainFragment).commit();
-
+        mMainFragment = (MainActivityFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_container);
         new NetworkAsyncTask(mMainFragment).execute("sort_by=popularity.desc");
 
-        if (findViewById(R.id.fragment_detail_container) != null) {
-            if (savedInstanceState != null) {
-                return;
-            }
+        if (findViewById(R.id.movie_detail_container) != null) {
             mTwoPane = true;
             mMainFragment.setActivateOnItemClick(true);
+            mMainFragment.setTwoPaneMode();
         }
     }
-
 
     /**
      * Callback method from {@link MainActivityFragment.ClickCallback}
@@ -43,7 +35,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
      */
     @Override
     public void onItemSelected(MovieModel movie) {
-        Log.d("MAIN", "Position" + movie.getTitle());
 
         if (mTwoPane) {
             // In two-pane mode, show the detail view in this activity by
@@ -77,11 +68,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+
         int id = item.getItemId();
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_filter_popular) {
             new NetworkAsyncTask(mMainFragment).execute("sort_by=popularity.desc");
             return true;

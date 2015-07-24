@@ -6,4 +6,4 @@
     android:horizontalSpacing="0dp"
     android:numColumns="2"
     android:stretchMode="columnWidth"
-    android:verticalSpacing="00dp" />
+    android:verticalSpacing="0dp" />
