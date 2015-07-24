@@ -1,5 +1,7 @@
 package com.duckma.popularmovies.models;
 
+import com.duckma.popularmovies.utils.NetworkAsyncTask;
+
 /**
  * Copyright © 2015 DuckMa S.r.l. - http://duckma.com
  * <p/>
@@ -89,7 +91,9 @@ public class MovieModel {
     }
 
     public String getPoster_path() {
-        return poster_path;
+
+
+        return NetworkAsyncTask.IMAGES_BASE_PATH + poster_path;
     }
 
     public void setPoster_path(String poster_path) {

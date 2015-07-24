@@ -2,24 +2,15 @@ package com.duckma.popularmovies;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.duckma.popularmovies.models.MovieModel;
-import com.duckma.popularmovies.utils.NetworkAsyncTask;
-
-import java.util.ArrayList;
-
-public class MainActivity extends AppCompatActivity implements NetworkAsyncTask.NetworkDoneListener {
+public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        NetworkAsyncTask nAT = new NetworkAsyncTask();
-        nAT.networkDoneListener = this;
-        nAT.execute("sort_by=popularity.desc");
     }
 
 
@@ -46,8 +37,4 @@ public class MainActivity extends AppCompatActivity implements NetworkAsyncTask.
     }
 
 
-    @Override
-    public void OnNetworkDone(ArrayList<MovieModel> movies) {
-        Log.d("tesst", "Parsed: " + movies.size());
-    }
 }
