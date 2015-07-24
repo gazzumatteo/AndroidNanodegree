@@ -31,6 +31,7 @@ public class MainActivityFragment extends Fragment implements NetworkAsyncTask.N
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
         return inflater.inflate(R.layout.fragment_main, container, false);
     }
 
@@ -53,10 +54,6 @@ public class MainActivityFragment extends Fragment implements NetworkAsyncTask.N
         mRecyclerView.setAdapter(mAdapter);
 
 
-
-        NetworkAsyncTask nAT = new NetworkAsyncTask();
-        nAT.networkDoneListener = this;
-        nAT.execute("sort_by=popularity.desc");
     }
 
     @Override

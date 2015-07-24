@@ -2,7 +2,6 @@ package com.duckma.popularmovies.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,12 +56,15 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-
         MovieModel movie = mMovies.get(position);
-        Log.d("ADAPTER", movie.getPoster_path());
+
+//      Decomment to use Picasso
+//        Picasso.with(mContext).load(movie.getPoster_path())
+//                .placeholder(R.drawable.placeholder)
+//                .into(holder.mIvMoviePoster);
+
         Glide.with(mContext)
                 .load(movie.getPoster_path())
-                .centerCrop()
                 .placeholder(R.drawable.placeholder)
                 .crossFade()
                 .into(holder.mIvMoviePoster);

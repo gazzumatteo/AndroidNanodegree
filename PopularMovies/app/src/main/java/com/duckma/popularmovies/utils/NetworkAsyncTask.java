@@ -32,8 +32,14 @@ public class NetworkAsyncTask extends AsyncTask<String, Integer, ArrayList<Movie
 
     private HttpURLConnection mUrlConnection = null;
     private BufferedReader mReader = null;
+
+
     public NetworkDoneListener networkDoneListener;
     ArrayList<MovieModel> mMovies = new ArrayList<>();
+
+    public NetworkAsyncTask(NetworkDoneListener networkDoneListener) {
+        this.networkDoneListener = networkDoneListener;
+    }
 
     @Override
     protected ArrayList<MovieModel> doInBackground(String... params) {
