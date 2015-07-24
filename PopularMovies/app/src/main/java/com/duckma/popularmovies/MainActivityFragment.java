@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,21 +38,21 @@ public class MainActivityFragment extends Fragment implements NetworkAsyncTask.N
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.my_recycler_view);
+
+//        Could be true because the api return always 20 elements
 //        mRecyclerView.setHasFixedSize(true);
+
         // use a linear layout manager
         mLayoutManager = new GridLayoutManager(getActivity(), 2);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        //Calculate the grid cell dimension
-        DisplayMetrics metrics = new DisplayMetrics();
-        getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        int cellHeight = metrics.heightPixels/2;
+//        Calculate the grid cell dimension better screen size support improvement
+//        DisplayMetrics metrics = new DisplayMetrics();
+//        getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
+//        int cellHeight = metrics.heightPixels/2;
 
-        // specify an adapter (see also next example)
         mAdapter = new MovieAdapter(mMovies, getActivity());
         mRecyclerView.setAdapter(mAdapter);
-
-
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.duckma.popularmovies.utils;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.duckma.popularmovies.Config;
 import com.duckma.popularmovies.models.MovieModel;
 
 import org.json.JSONArray;
@@ -23,12 +24,7 @@ import java.util.ArrayList;
  * Created by Matteo Gazzurelli on 23/07/15.
  */
 public class NetworkAsyncTask extends AsyncTask<String, Integer, ArrayList<MovieModel>> {
-    public static final String BASE_URL = "http://api.themoviedb.org/3/";
-    public static final String DISCOVER_PATH = "discover/movie";
-    public static final String IMAGES_BASE_PATH = "http://image.tmdb.org/t/p/w185";
 
-    //    private static final String TMDB_API_KEY = "[REPLACE_WITH_YOUR_TMDB_API_KEY]";
-    private static final String TMDB_API_KEY = "faf97e5d5bfa445b8b953a0a7bacd059";
 
     private HttpURLConnection mUrlConnection = null;
     private BufferedReader mReader = null;
@@ -53,7 +49,7 @@ public class NetworkAsyncTask extends AsyncTask<String, Integer, ArrayList<Movie
             /*
              *  CALL TO WS TO RETRIEVE MOVIES. BETTER TO USE VOLLEY OR RETROFIT
              */
-            URL url = new URL(BASE_URL + DISCOVER_PATH + "?" + params[0] + "&api_key=" + TMDB_API_KEY);
+            URL url = new URL(Config.BASE_URL + Config.DISCOVER_PATH + "?" + params[0] + "&api_key=" + Config.TMDB_API_KEY);
 
             // Create the request to OpenWeatherMap, and open the connection
             mUrlConnection = (HttpURLConnection) url.openConnection();
