@@ -23,7 +23,7 @@ public class MovieModel implements Serializable {
     String poster_path;
     double popularity;
     String title;
-    String runtime;
+    int runtime;
     boolean video;
     double vote_average;
     int vote_count;
@@ -148,11 +148,11 @@ public class MovieModel implements Serializable {
         this.vote_count = vote_count;
     }
 
-    public String getRuntime() {
+    public int getRuntime() {
         return runtime;
     }
 
-    public void setRuntime(String runtime) {
+    public void setRuntime(int runtime) {
         this.runtime = runtime;
     }
 

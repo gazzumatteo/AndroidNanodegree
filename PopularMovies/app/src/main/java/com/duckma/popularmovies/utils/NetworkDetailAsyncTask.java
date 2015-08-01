@@ -111,7 +111,7 @@ public class NetworkDetailAsyncTask extends AsyncTask<String, Integer, MovieMode
                 movieModel.setVideo(movie.getBoolean("video"));
                 movieModel.setVote_average(movie.getDouble("vote_average"));
                 movieModel.setVote_count(movie.getInt("vote_count"));
-                movieModel.setRuntime("runtime");
+                movieModel.setRuntime(movie.getInt("runtime"));
 
             } catch (JSONException e) {
                 e.printStackTrace();

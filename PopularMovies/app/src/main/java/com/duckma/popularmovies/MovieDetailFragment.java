@@ -77,8 +77,8 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
                 .placeholder(R.drawable.placeholder)
                 .into(ivMoviePoster);
         tvYear.setText(mMovie.getRelease_date().substring(0, 4));
-        if(!mMovie.getRuntime().isEmpty())
-            tvMovieLength.setText(mMovie.getRuntime() + "min");
+        if(mMovie.getRuntime() > -1)
+            tvMovieLength.setText(mMovie.getRuntime() + " min");
         tvMovieScore.setText(String.valueOf(mMovie.getVote_average()) + "/10");
         tvMovieDescription.setText(mMovie.getOverview());
     }
