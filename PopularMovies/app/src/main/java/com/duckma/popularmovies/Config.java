@@ -9,6 +9,8 @@ public class Config {
     public static final String BASE_URL = "http://api.themoviedb.org/3/";
     public static final String DISCOVER_PATH = "discover/movie";
     public static final String MOVIE_PATH = "movie";
+    public static final String TRAILER_PATH = "movie/{id}/videos";
+    public static final String REVIEWS_PATH = "movie/{id}/reviews";
     public static final String IMAGES_BASE_PATH = "http://image.tmdb.org/t/p/w185";
     private static final String TMDB_API_KEY = "[REPLACE_WITH_YOUR_TMDB_API_KEY]";
 
