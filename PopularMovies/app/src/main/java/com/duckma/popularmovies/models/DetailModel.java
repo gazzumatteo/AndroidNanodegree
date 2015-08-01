@@ -5,14 +5,36 @@ package com.duckma.popularmovies.models;
  * <p/>
  * Created by Matteo Gazzurelli on 01/08/15.
  */
-public class VideoModel {
+public class DetailModel {
+    public static final int TYPE_TRAILER = 0;
+    public static final int TYPE_REVIEW = 1;
+    public static final int TYPE_SEPARATOR = 2;
+
     String id;
+
+    //Trailer Fields
     String iso_639_1;
     String key;
     String name;
     String site;
     int size;
     String type;
+
+    // Review Fields To simplify get only the first page
+    String author;
+    String content;
+    String url;
+
+    int contentType;
+
+    public int getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(int contentType) {
+        this.contentType = contentType;
+    }
+
 
     public String getType() {
         return type;
@@ -70,5 +92,31 @@ public class VideoModel {
         this.size = size;
     }
 
+    public String getAuthor() {
+        return author;
+    }
 
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public boolean isATrailer() {
+        return !content.isEmpty();
+    }
 }

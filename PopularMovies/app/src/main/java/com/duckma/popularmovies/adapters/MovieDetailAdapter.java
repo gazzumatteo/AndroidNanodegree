@@ -1,15 +1,17 @@
 package com.duckma.popularmovies.adapters;
 
 import android.content.Context;
-import android.util.Log;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.duckma.popularmovies.R;
-import com.duckma.popularmovies.models.VideoModel;
+import com.duckma.popularmovies.models.DetailModel;
 
 import java.util.ArrayList;
 
@@ -19,12 +21,12 @@ import java.util.ArrayList;
  * Created by Matteo Gazzurelli on 01/08/15.
  */
 public class MovieDetailAdapter extends BaseAdapter {
-    private ArrayList<VideoModel> mVideos = new ArrayList<>();
+    private ArrayList<DetailModel> mDetailObj = new ArrayList<>();
     private Context mContext;
 
-    public MovieDetailAdapter(Context context, ArrayList<VideoModel> objects) {
+    public MovieDetailAdapter(Context context, ArrayList<DetailModel> objects) {
         mContext = context;
-        mVideos = objects;
+        mDetailObj = objects;
     }
 
     @Override
@@ -37,17 +39,39 @@ public class MovieDetailAdapter extends BaseAdapter {
             v = inflater.inflate(R.layout.movie_detail_item, parent, false);
             // cache view fields into the holder
             holder = new ViewHolder();
-            holder.mTvDescription = (TextView) v.findViewById(R.id.tvTitle);
+            holder.rlContainer = (RelativeLayout) v.findViewById(R.id.rlContainer);
+            holder.ivIcon = (ImageView) v.findViewById(R.id.ivIcon);
+            holder.tvDescription = (TextView) v.findViewById(R.id.tvTitle);
+
             // associate the holder with the view for later lookup
             v.setTag(holder);
         } else {
             // view already exists, get the holder instance from the view
             holder = (ViewHolder) v.getTag();
         }
-        VideoModel video = mVideos.get(position);
-        holder.mTvDescription.setText(video.getName());
-        if (v.isSelected()) {
-            Log.d("View", "selected " + video.getName());
+
+        DetailModel detailObj = mDetailObj.get(position);
+        float height = mContext.getResources().getDimension(R.dimen.detail_item_height);
+        switch (detailObj.getContentType()) {
+            case DetailModel.TYPE_SEPARATOR:
+                height = mContext.getResources().getDimension(R.dimen.separator_height);
+                holder.rlContainer.setMinimumHeight(Math.round(height));
+                holder.ivIcon.setVisibility(View.GONE);
+                holder.tvDescription.setTypeface(Typeface.DEFAULT_BOLD);
+                holder.tvDescription.setText(detailObj.getName());
+                break;
+            case DetailModel.TYPE_TRAILER:
+                holder.rlContainer.setMinimumHeight(Math.round(height));
+                holder.tvDescription.setText(detailObj.getName());
+                holder.ivIcon.setVisibility(View.VISIBLE);
+                holder.tvDescription.setTypeface(Typeface.DEFAULT);
+                break;
+            case DetailModel.TYPE_REVIEW:
+                holder.rlContainer.setMinimumHeight(Math.round(height));
+                holder.tvDescription.setText(detailObj.getAuthor() + " - " + detailObj.getContent().substring(0, 50));
+                holder.ivIcon.setVisibility(View.VISIBLE);
+                holder.tvDescription.setTypeface(Typeface.DEFAULT);
+                break;
         }
 
         return v;
@@ -55,12 +79,12 @@ public class MovieDetailAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return mVideos.size();
+        return mDetailObj.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return mVideos.get(position);
+        return mDetailObj.get(position);
     }
 
     @Override
@@ -69,7 +93,10 @@ public class MovieDetailAdapter extends BaseAdapter {
     }
 
     public static class ViewHolder {
-        TextView mTvDescription;
+        RelativeLayout rlContainer;
+        TextView tvDescription;
+        ImageView ivIcon;
+
     }
 
 }

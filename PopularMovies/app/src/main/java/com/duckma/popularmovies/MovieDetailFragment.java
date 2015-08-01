@@ -6,15 +6,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.duckma.popularmovies.adapters.MovieDetailAdapter;
-import com.duckma.popularmovies.api.TrailerService;
-import com.duckma.popularmovies.api.VideoModelCall;
+import com.duckma.popularmovies.api.DetailModelCall;
+import com.duckma.popularmovies.api.DetailService;
+import com.duckma.popularmovies.models.DetailModel;
 import com.duckma.popularmovies.models.MovieModel;
-import com.duckma.popularmovies.models.VideoModel;
 import com.duckma.popularmovies.utils.NetworkDetailAsyncTask;
 import com.squareup.picasso.Picasso;
 
@@ -34,9 +35,9 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
     ImageView ivMoviePoster;
     MovieModel mMovie;
     ListView mListView;
-    ArrayList<VideoModel> mVideos = new ArrayList<>();
+    ArrayList<DetailModel> mDetailObjects = new ArrayList<>();
     MovieDetailAdapter mAdapter;
-
+    RestAdapter mRestAdapter;
 
 
     public MovieDetailFragment() {
@@ -50,6 +51,11 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
             mMovieId = getArguments().getInt(ARG_ITEM_ID);
             new NetworkDetailAsyncTask(this).execute(String.valueOf(mMovieId));
         }
+
+        mRestAdapter = new RestAdapter.Builder()
+                .setLogLevel(RestAdapter.LogLevel.BASIC)
+                .setEndpoint(Config.BASE_URL)
+                .build();
     }
 
     @Override
@@ -63,18 +69,45 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
     }
 
     private void getTrailers() {
-        RestAdapter restAdapter = new RestAdapter.Builder()
-                .setEndpoint(Config.BASE_URL)
-                .build();
 
-        TrailerService service = restAdapter.create(TrailerService.class);
-        service.getTrailers(mMovieId, new Callback<VideoModelCall>() {
+        mDetailObjects.clear();
+
+        DetailService trailerService = mRestAdapter.create(DetailService.class);
+        // Add Trailers
+        trailerService.getTrailers(mMovieId, new Callback<DetailModelCall>() {
             @Override
-            public void success(VideoModelCall videoModelCall, Response response) {
-                Log.d("Count", "sixe: " + videoModelCall.getResults().size());
-                mVideos.clear();
-                for (VideoModel video:videoModelCall.getResults()) {
-                    mVideos.add(video);
+            public void success(DetailModelCall detailModelCall, Response response) {
+                // Add Separator
+                addSeparator("Trailers");
+
+                for (DetailModel trailer : detailModelCall.getResults()) {
+                    trailer.setContentType(DetailModel.TYPE_TRAILER);
+                    mDetailObjects.add(trailer);
+                }
+                mAdapter.notifyDataSetChanged();
+                getReviews();
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+
+            }
+        });
+
+    }
+
+    private void getReviews() {
+        DetailService reviewService = mRestAdapter.create(DetailService.class);
+        // Add Reviews
+        reviewService.getReviews(mMovieId, new Callback<DetailModelCall>() {
+            @Override
+            public void success(DetailModelCall detailModelCall, Response response) {
+                // Add Separator
+                addSeparator("Reviews");
+                for (DetailModel review : detailModelCall.getResults()) {
+                    Log.d("TEST", review.getAuthor());
+                    review.setContentType(DetailModel.TYPE_REVIEW);
+                    mDetailObjects.add(review);
                 }
                 mAdapter.notifyDataSetChanged();
             }
@@ -86,17 +119,24 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
         });
     }
 
+    public void addSeparator(String title) {
+        DetailModel separatorModel = new DetailModel();
+        separatorModel.setContentType(DetailModel.TYPE_SEPARATOR);
+        separatorModel.setName(title);
+        mDetailObjects.add(separatorModel);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
         mListView = (ListView) rootView.findViewById(R.id.lvMovieTrailers);
-        mAdapter = new MovieDetailAdapter(getActivity(), mVideos);
+        mAdapter = new MovieDetailAdapter(getActivity(), mDetailObjects);
         mListView.setAdapter(mAdapter);
-        tvMovieTitle = ((TextView) rootView.findViewById(R.id.tvMovieTitle));
 
         if (mMovieId != -1) {
             View header = getActivity().getLayoutInflater().inflate(R.layout.movie_detail_header, null);
+            tvMovieTitle = ((TextView) header.findViewById(R.id.tvMovieTitle));
             ivMoviePoster = ((ImageView) header.findViewById(R.id.ivMoviePoster));
             tvYear = (TextView) header.findViewById(R.id.tvYear);
             tvMovieLength = (TextView) header.findViewById(R.id.tvMovieLength);
@@ -105,6 +145,24 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
             mListView.addHeaderView(header);
         }
 
+
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                DetailModel itemClicked = mDetailObjects.get(position);
+                switch (itemClicked.getContentType()) {
+                    case DetailModel.TYPE_SEPARATOR:
+                        break;
+                    case DetailModel.TYPE_TRAILER:
+
+                        break;
+                    case DetailModel.TYPE_REVIEW:
+
+                        break;
+                }
+            }
+
+        });
         return rootView;
     }
 

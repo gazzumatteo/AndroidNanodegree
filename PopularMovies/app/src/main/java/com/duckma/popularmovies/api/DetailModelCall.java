@@ -1,6 +1,6 @@
 package com.duckma.popularmovies.api;
 
-import com.duckma.popularmovies.models.VideoModel;
+import com.duckma.popularmovies.models.DetailModel;
 
 import java.util.List;
 
@@ -9,15 +9,15 @@ import java.util.List;
  * <p/>
  * Created by Matteo Gazzurelli on 01/08/15.
  */
-public class VideoModelCall {
+public class DetailModelCall {
     int id;
-    List<VideoModel> results;
+    List<DetailModel> results;
 
-    public List<VideoModel> getResults() {
+    public List<DetailModel> getResults() {
         return results;
     }
 
-    public void setResults(List<VideoModel> results) {
+    public void setResults(List<DetailModel> results) {
         this.results = results;
     }
 
