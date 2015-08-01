@@ -7,13 +7,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
+import com.duckma.popularmovies.adapters.MovieDetailAdapter;
 import com.duckma.popularmovies.api.TrailerService;
 import com.duckma.popularmovies.api.VideoModelCall;
 import com.duckma.popularmovies.models.MovieModel;
+import com.duckma.popularmovies.models.VideoModel;
 import com.duckma.popularmovies.utils.NetworkDetailAsyncTask;
 import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;
@@ -28,6 +33,10 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
     TextView tvMovieTitle, tvYear, tvMovieLength, tvMovieScore, tvMovieDescription;
     ImageView ivMoviePoster;
     MovieModel mMovie;
+    ListView mListView;
+    ArrayList<VideoModel> mVideos = new ArrayList<>();
+    MovieDetailAdapter mAdapter;
+
 
 
     public MovieDetailFragment() {
@@ -63,6 +72,11 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
             @Override
             public void success(VideoModelCall videoModelCall, Response response) {
                 Log.d("Count", "sixe: " + videoModelCall.getResults().size());
+                mVideos.clear();
+                for (VideoModel video:videoModelCall.getResults()) {
+                    mVideos.add(video);
+                }
+                mAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -76,14 +90,19 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
+        mListView = (ListView) rootView.findViewById(R.id.lvMovieTrailers);
+        mAdapter = new MovieDetailAdapter(getActivity(), mVideos);
+        mListView.setAdapter(mAdapter);
+        tvMovieTitle = ((TextView) rootView.findViewById(R.id.tvMovieTitle));
 
         if (mMovieId != -1) {
-            tvMovieTitle = ((TextView) rootView.findViewById(R.id.tvMovieTitle));
-            ivMoviePoster = ((ImageView) rootView.findViewById(R.id.ivMoviePoster));
-            tvYear = (TextView) rootView.findViewById(R.id.tvYear);
-            tvMovieLength = (TextView) rootView.findViewById(R.id.tvMovieLength);
-            tvMovieScore = (TextView) rootView.findViewById(R.id.tvMovieScore);
-            tvMovieDescription = (TextView) rootView.findViewById(R.id.tvMovieDescription);
+            View header = getActivity().getLayoutInflater().inflate(R.layout.movie_detail_header, null);
+            ivMoviePoster = ((ImageView) header.findViewById(R.id.ivMoviePoster));
+            tvYear = (TextView) header.findViewById(R.id.tvYear);
+            tvMovieLength = (TextView) header.findViewById(R.id.tvMovieLength);
+            tvMovieScore = (TextView) header.findViewById(R.id.tvMovieScore);
+            tvMovieDescription = (TextView) header.findViewById(R.id.tvMovieDescription);
+            mListView.addHeaderView(header);
         }
 
         return rootView;
