@@ -2,15 +2,23 @@ package com.duckma.popularmovies;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.duckma.popularmovies.api.TrailerService;
+import com.duckma.popularmovies.api.VideoModelCall;
 import com.duckma.popularmovies.models.MovieModel;
 import com.duckma.popularmovies.utils.NetworkDetailAsyncTask;
 import com.squareup.picasso.Picasso;
+
+import retrofit.Callback;
+import retrofit.RestAdapter;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 
 public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncTask.NetworkDoneListener {
@@ -42,6 +50,26 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
             mMovie = (MovieModel) savedInstanceState.getSerializable(BUNDLE_ITEM);
             populateFields();
         }
+        getTrailers();
+    }
+
+    private void getTrailers() {
+        RestAdapter restAdapter = new RestAdapter.Builder()
+                .setEndpoint(Config.BASE_URL)
+                .build();
+
+        TrailerService service = restAdapter.create(TrailerService.class);
+        service.getTrailers(mMovieId, new Callback<VideoModelCall>() {
+            @Override
+            public void success(VideoModelCall videoModelCall, Response response) {
+                Log.d("Count", "sixe: " + videoModelCall.getResults().size());
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+
+            }
+        });
     }
 
     @Override
@@ -64,7 +92,7 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
 
     @Override
     public void OnNetworkDone(MovieModel movie) {
-        if(isVisible()) { // populate only if the fragment is visible
+        if (isVisible()) { // populate only if the fragment is visible
             mMovie = movie;
             populateFields();
         }
@@ -77,7 +105,7 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
                 .placeholder(R.drawable.placeholder)
                 .into(ivMoviePoster);
         tvYear.setText(mMovie.getRelease_date().substring(0, 4));
-        if(mMovie.getRuntime() > -1)
+        if (mMovie.getRuntime() > -1)
             tvMovieLength.setText(mMovie.getRuntime() + " min");
         tvMovieScore.setText(String.valueOf(mMovie.getVote_average()) + "/10");
         tvMovieDescription.setText(mMovie.getOverview());
