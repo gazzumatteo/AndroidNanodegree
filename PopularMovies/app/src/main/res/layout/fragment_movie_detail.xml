@@ -19,8 +19,8 @@
 
         <ImageView
             android:id="@+id/ivMoviePoster"
-            android:layout_width="185dp"
-            android:layout_height="278dp"
+            android:layout_width="@dimen/movie_poster_width"
+            android:layout_height="@dimen/movie_poster_height"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_below="@+id/tvMovieTitle"
