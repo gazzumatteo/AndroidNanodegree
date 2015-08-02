@@ -1,8 +1,11 @@
 package com.duckma.popularmovies;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +33,7 @@ import retrofit.client.Response;
 public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncTask.NetworkDoneListener {
     public static final String ARG_ITEM_ID = "movie_id";
     public static final String BUNDLE_ITEM = "downloaded_movie";
+    public static final String BUNDLE_ITEM_DETAILS = "downloaded_movie_details";
     private int mMovieId;
     TextView tvMovieTitle, tvYear, tvMovieLength, tvMovieScore, tvMovieDescription;
     ImageView ivMoviePoster;
@@ -53,7 +57,6 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
         }
 
         mRestAdapter = new RestAdapter.Builder()
-                .setLogLevel(RestAdapter.LogLevel.BASIC)
                 .setEndpoint(Config.BASE_URL)
                 .build();
     }
@@ -65,7 +68,15 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
             mMovie = (MovieModel) savedInstanceState.getSerializable(BUNDLE_ITEM);
             populateFields();
         }
-        getTrailers();
+        if (savedInstanceState != null && savedInstanceState.containsKey(BUNDLE_ITEM_DETAILS)) {
+            ArrayList<DetailModel> tmpDetailObjects = (ArrayList<DetailModel>) savedInstanceState.getSerializable(BUNDLE_ITEM_DETAILS);
+            for (DetailModel model : tmpDetailObjects) {
+                mDetailObjects.add(model);
+            }
+            mAdapter.notifyDataSetChanged();
+        } else {
+            getTrailers();
+        }
     }
 
     private void getTrailers() {
@@ -79,7 +90,6 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
             public void success(DetailModelCall detailModelCall, Response response) {
                 // Add Separator
                 addSeparator("Trailers");
-
                 for (DetailModel trailer : detailModelCall.getResults()) {
                     trailer.setContentType(DetailModel.TYPE_TRAILER);
                     mDetailObjects.add(trailer);
@@ -90,7 +100,7 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
 
             @Override
             public void failure(RetrofitError error) {
-
+                getReviews(); // get reviews either it fails
             }
         });
 
@@ -105,7 +115,6 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
                 // Add Separator
                 addSeparator("Reviews");
                 for (DetailModel review : detailModelCall.getResults()) {
-                    Log.d("TEST", review.getAuthor());
                     review.setContentType(DetailModel.TYPE_REVIEW);
                     mDetailObjects.add(review);
                 }
@@ -131,6 +140,7 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
         mListView = (ListView) rootView.findViewById(R.id.lvMovieTrailers);
+
         mAdapter = new MovieDetailAdapter(getActivity(), mDetailObjects);
         mListView.setAdapter(mAdapter);
 
@@ -149,19 +159,23 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                DetailModel itemClicked = mDetailObjects.get(position);
+                // NOTE: position == position-1 because the first position is the header
+                DetailModel itemClicked = mDetailObjects.get(position - 1);
                 switch (itemClicked.getContentType()) {
                     case DetailModel.TYPE_SEPARATOR:
+                        // do nothing, is a separator
                         break;
                     case DetailModel.TYPE_TRAILER:
-
+                        if (itemClicked.getSite().equals("YouTube")) {
+                            Intent videoIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.youtube.com/watch?v=" + itemClicked.getKey()));
+                            startActivity(videoIntent);
+                        }
                         break;
                     case DetailModel.TYPE_REVIEW:
-
+                        displayReview(itemClicked);
                         break;
                 }
             }
-
         });
         return rootView;
     }
@@ -193,6 +207,24 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
         super.onSaveInstanceState(outState);
         if (mMovie != null)
             outState.putSerializable(BUNDLE_ITEM, mMovie);
+        if (mDetailObjects != null)
+            outState.putSerializable(BUNDLE_ITEM_DETAILS, mDetailObjects);
+    }
 
+    private void displayReview(DetailModel detail) {
+
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(getActivity());
+        builder1.setTitle(detail.getAuthor());
+        builder1.setMessage(detail.getContent());
+        builder1.setCancelable(true);
+        builder1.setPositiveButton("Ok",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+
+        AlertDialog alert11 = builder1.create();
+        alert11.show();
     }
 }
