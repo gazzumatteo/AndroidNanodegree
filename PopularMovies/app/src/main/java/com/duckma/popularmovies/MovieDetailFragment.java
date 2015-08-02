@@ -88,13 +88,15 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
         trailerService.getTrailers(mMovieId, new Callback<DetailModelCall>() {
             @Override
             public void success(DetailModelCall detailModelCall, Response response) {
-                // Add Separator
-                addSeparator("Trailers");
-                for (DetailModel trailer : detailModelCall.getResults()) {
-                    trailer.setContentType(DetailModel.TYPE_TRAILER);
-                    mDetailObjects.add(trailer);
+                if (detailModelCall.getResults().size() > 0) {
+                    // Add Separator
+                    addSeparator("Trailers");
+                    for (DetailModel trailer : detailModelCall.getResults()) {
+                        trailer.setContentType(DetailModel.TYPE_TRAILER);
+                        mDetailObjects.add(trailer);
+                    }
+                    mAdapter.notifyDataSetChanged();
                 }
-                mAdapter.notifyDataSetChanged();
                 getReviews();
             }
 
@@ -112,13 +114,15 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
         reviewService.getReviews(mMovieId, new Callback<DetailModelCall>() {
             @Override
             public void success(DetailModelCall detailModelCall, Response response) {
-                // Add Separator
-                addSeparator("Reviews");
-                for (DetailModel review : detailModelCall.getResults()) {
-                    review.setContentType(DetailModel.TYPE_REVIEW);
-                    mDetailObjects.add(review);
+                if (detailModelCall.getResults().size() > 0) {
+                    // Add Separator
+                    addSeparator("Reviews");
+                    for (DetailModel review : detailModelCall.getResults()) {
+                        review.setContentType(DetailModel.TYPE_REVIEW);
+                        mDetailObjects.add(review);
+                    }
+                    mAdapter.notifyDataSetChanged();
                 }
-                mAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -190,7 +194,7 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
     }
 
     private void populateFields() {
-        getActivity().setTitle(mMovie.getTitle());
+//        getActivity().setTitle(mMovie.getTitle());
         tvMovieTitle.setText(mMovie.getTitle());
         Picasso.with(getActivity()).load(mMovie.getPoster_path())
                 .placeholder(R.drawable.placeholder)

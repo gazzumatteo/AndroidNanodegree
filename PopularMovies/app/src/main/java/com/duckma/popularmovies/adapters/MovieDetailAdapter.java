@@ -64,12 +64,15 @@ public class MovieDetailAdapter extends BaseAdapter {
                 holder.rlContainer.setMinimumHeight(Math.round(height));
                 holder.tvDescription.setText(detailObj.getName());
                 holder.ivIcon.setVisibility(View.VISIBLE);
+                holder.ivIcon.setImageDrawable(mContext.getResources().getDrawable(R.drawable.playbutton));
                 holder.tvDescription.setTypeface(Typeface.DEFAULT);
                 break;
             case DetailModel.TYPE_REVIEW:
                 holder.rlContainer.setMinimumHeight(Math.round(height));
-                holder.tvDescription.setText(detailObj.getAuthor() + " - " + detailObj.getContent().substring(0, 50));
+                String label = (detailObj.getContent().length() >= 50) ? detailObj.getContent().substring(0, 50) : detailObj.getContent();
+                holder.tvDescription.setText(detailObj.getAuthor() + " - " + label);
                 holder.ivIcon.setVisibility(View.VISIBLE);
+                holder.ivIcon.setImageDrawable(mContext.getResources().getDrawable(R.drawable.reviewsbutton));
                 holder.tvDescription.setTypeface(Typeface.DEFAULT);
                 break;
         }
