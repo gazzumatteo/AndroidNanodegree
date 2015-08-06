@@ -1,5 +1,7 @@
 package com.duckma.popularmovies.provider;
 
+import android.net.Uri;
+
 import de.triplet.simpleprovider.AbstractProvider;
 import de.triplet.simpleprovider.Column;
 import de.triplet.simpleprovider.Table;
@@ -11,6 +13,9 @@ import de.triplet.simpleprovider.Table;
  */
 public class MovieProvider extends AbstractProvider {
     public static final String MOVIE_AUTHORITY = "com.duckma.popularmovies.movies";
+    public static final Uri MOVIES_CONTENT_URI = Uri.parse("content://"+MOVIE_AUTHORITY + "/movies");
+    public static final Uri MOVIE_DETAILS_CONTENT_URI = Uri.parse("content://"+MOVIE_AUTHORITY + "/moviedetails");
+
 
     @Override
     protected String getAuthority() {

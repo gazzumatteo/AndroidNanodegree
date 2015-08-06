@@ -1,8 +1,10 @@
 package com.duckma.popularmovies;
 
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -13,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -22,6 +25,7 @@ import com.duckma.popularmovies.api.DetailModelCall;
 import com.duckma.popularmovies.api.DetailService;
 import com.duckma.popularmovies.models.DetailModel;
 import com.duckma.popularmovies.models.MovieModel;
+import com.duckma.popularmovies.provider.MovieProvider;
 import com.duckma.popularmovies.utils.NetworkDetailAsyncTask;
 import com.squareup.picasso.Picasso;
 
@@ -40,12 +44,14 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
     private int mMovieId;
     TextView tvMovieTitle, tvYear, tvMovieLength, tvMovieScore, tvMovieDescription;
     ImageView ivMoviePoster;
+    Button mBtnFavorite;
     MovieModel mMovie;
     ListView mListView;
     ArrayList<DetailModel> mDetailObjects = new ArrayList<>();
     MovieDetailAdapter mAdapter;
     RestAdapter mRestAdapter;
     DetailModel videoToShareDetail;
+    boolean mIsFavorite;
 
 
     public MovieDetailFragment() {
@@ -58,7 +64,9 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
         setHasOptionsMenu(true);
         if (savedInstanceState == null && getArguments().containsKey(ARG_ITEM_ID)) {
             mMovieId = getArguments().getInt(ARG_ITEM_ID);
-            new NetworkDetailAsyncTask(this).execute(String.valueOf(mMovieId));
+            mIsFavorite = isInFavorites();
+        } else {
+            return;
         }
 
         mRestAdapter = new RestAdapter.Builder()
@@ -66,20 +74,55 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
                 .build();
     }
 
+    private void getMovieFromContentProvider() {
+        mMovie = new MovieModel();
+        String[] projection = {MovieProvider.Movie.KEY_ID,
+                MovieProvider.Movie.KEY_OVERVIEW, MovieProvider.Movie.KEY_RELEASE_DATE,
+                MovieProvider.Movie.KEY_POSTER_PATH, MovieProvider.Movie.KEY_TITLE,
+                MovieProvider.Movie.KEY_VOTE_AVERAGE, MovieProvider.Movie.KEY_RUNTIME
+        };
+
+        // get all movies in db
+        Cursor c = getActivity().getContentResolver().query(MovieProvider.MOVIES_CONTENT_URI, projection, null, null, null);
+        if (c != null && c.getCount() > 0) {
+            c.moveToNext();
+            mMovie.setId(c.getInt(c.getColumnIndex(MovieProvider.Movie.KEY_ID)));
+            mMovie.setOverview(c.getString(c.getColumnIndex(MovieProvider.Movie.KEY_OVERVIEW)));
+            mMovie.setRelease_date(c.getString(c.getColumnIndex(MovieProvider.Movie.KEY_RELEASE_DATE)));
+            mMovie.setPoster_path(c.getString(c.getColumnIndex(MovieProvider.Movie.KEY_POSTER_PATH)));
+            mMovie.setTitle(c.getString(c.getColumnIndex(MovieProvider.Movie.KEY_TITLE)));
+            mMovie.setVote_average(c.getDouble(c.getColumnIndex(MovieProvider.Movie.KEY_VOTE_AVERAGE)));
+            mMovie.setRuntime(c.getInt(c.getColumnIndex(MovieProvider.Movie.KEY_RUNTIME)));
+            c.close();
+        }
+
+    }
+
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        if (mIsFavorite) {
+            getMovieFromContentProvider();
+            populateFields();
+        } else {
+            new NetworkDetailAsyncTask(this).execute(String.valueOf(mMovieId));
+        }
+
         if (savedInstanceState != null && savedInstanceState.containsKey(BUNDLE_ITEM)) {
             mMovie = (MovieModel) savedInstanceState.getSerializable(BUNDLE_ITEM);
             populateFields();
         }
         if (savedInstanceState != null && savedInstanceState.containsKey(BUNDLE_ITEM_DETAILS)) {
             ArrayList<DetailModel> tmpDetailObjects = (ArrayList<DetailModel>) savedInstanceState.getSerializable(BUNDLE_ITEM_DETAILS);
-            for (DetailModel model : tmpDetailObjects) {
-                mDetailObjects.add(model);
+            if (tmpDetailObjects != null) {
+                for (DetailModel model : tmpDetailObjects) {
+                    mDetailObjects.add(model);
+                }
+                mAdapter.notifyDataSetChanged();
             }
-            mAdapter.notifyDataSetChanged();
         } else {
+            //TODO: check if is favourite
             getTrailers();
         }
     }
@@ -162,6 +205,14 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
             tvMovieLength = (TextView) header.findViewById(R.id.tvMovieLength);
             tvMovieScore = (TextView) header.findViewById(R.id.tvMovieScore);
             tvMovieDescription = (TextView) header.findViewById(R.id.tvMovieDescription);
+            mBtnFavorite = (Button) header.findViewById(R.id.btnFavorite);
+
+            mBtnFavorite.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    addRemoveMovieToFavorites();
+                }
+            });
             mListView.addHeaderView(header);
         }
 
@@ -190,6 +241,50 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
         return rootView;
     }
 
+    // TODO Add Details
+    private void addRemoveMovieToFavorites() {
+        Uri movieUri = Uri.withAppendedPath(MovieProvider.MOVIES_CONTENT_URI, String.valueOf(mMovieId));
+
+        if (mIsFavorite) { // present in db, remove it
+            int count = getActivity().getContentResolver().delete(movieUri, null, null);
+            if (count > 0) {
+                mBtnFavorite.setText(getResources().getString(R.string.btn_favorite));
+                mIsFavorite = false;
+            }
+        } else { // insert in db
+            ContentValues mMovieValues = new ContentValues();
+            mMovieValues.put(MovieProvider.Movie.KEY_ID, mMovie.getId());
+            mMovieValues.put(MovieProvider.Movie.KEY_OVERVIEW, mMovie.getOverview());
+            mMovieValues.put(MovieProvider.Movie.KEY_TITLE, mMovie.getTitle());
+            mMovieValues.put(MovieProvider.Movie.KEY_POSTER_PATH, mMovie.getPoster_path());
+            mMovieValues.put(MovieProvider.Movie.KEY_RELEASE_DATE, mMovie.getRelease_date());
+            mMovieValues.put(MovieProvider.Movie.KEY_RUNTIME, mMovie.getRuntime());
+            mMovieValues.put(MovieProvider.Movie.KEY_VOTE_AVERAGE, mMovie.getVote_average());
+
+            movieUri = getActivity().getContentResolver().insert(MovieProvider.MOVIES_CONTENT_URI, mMovieValues);
+            if (movieUri != null) {
+                mIsFavorite = false;
+                mBtnFavorite.setText(getResources().getString(R.string.btn_favorite_remove));
+            }
+        }
+    }
+
+    /**
+     * check if a movie is in Favorite
+     *
+     * @return true if is in DB
+     */
+    private boolean isInFavorites() {
+        String[] projection = {MovieProvider.Movie.KEY_ID};
+        Uri movieUri = Uri.withAppendedPath(MovieProvider.MOVIES_CONTENT_URI, String.valueOf(mMovieId));
+        // check if the movie is in db
+        Cursor c = getActivity().getContentResolver().query(movieUri, projection, null, null, null);
+        if (c != null && c.getCount() > 0) { // present in db, remove it
+            c.close();
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public void OnNetworkDone(MovieModel movie) {
@@ -200,7 +295,6 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
     }
 
     private void populateFields() {
-//        getActivity().setTitle(mMovie.getTitle());
         tvMovieTitle.setText(mMovie.getTitle());
         Picasso.with(getActivity()).load(mMovie.getPoster_path())
                 .placeholder(R.drawable.placeholder)
@@ -211,6 +305,11 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
             tvMovieLength.setText(mMovie.getRuntime() + " min");
         tvMovieScore.setText(String.valueOf(mMovie.getVote_average()) + "/10");
         tvMovieDescription.setText(mMovie.getOverview());
+
+        if (mIsFavorite)
+            mBtnFavorite.setText(getResources().getString(R.string.btn_favorite_remove));
+        else
+            mBtnFavorite.setText(getResources().getString(R.string.btn_favorite));
     }
 
     @Override

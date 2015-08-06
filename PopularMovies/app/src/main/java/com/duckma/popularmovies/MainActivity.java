@@ -81,6 +81,12 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
             return true;
         }
 
+        if (id == R.id.action_filter_favorites) {
+            if(mMainFragment.isVisible())
+                mMainFragment.loadFavorites();
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 

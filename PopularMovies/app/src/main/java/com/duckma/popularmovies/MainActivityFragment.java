@@ -1,6 +1,7 @@
 package com.duckma.popularmovies;
 
 import android.app.Activity;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -12,6 +13,7 @@ import android.widget.GridView;
 
 import com.duckma.popularmovies.adapters.MovieAdapter;
 import com.duckma.popularmovies.models.MovieModel;
+import com.duckma.popularmovies.provider.MovieProvider;
 import com.duckma.popularmovies.utils.NetworkListAsyncTask;
 
 import java.util.ArrayList;
@@ -140,6 +142,35 @@ public class MainActivityFragment extends Fragment implements NetworkListAsyncTa
         public void onItemSelected(int id) {
         }
     };
+
+    public void loadFavorites() {
+        String[] projection = { MovieProvider.Movie.KEY_ID,
+                MovieProvider.Movie.KEY_OVERVIEW, MovieProvider.Movie.KEY_RELEASE_DATE,
+                MovieProvider.Movie.KEY_POSTER_PATH, MovieProvider.Movie.KEY_TITLE,
+                MovieProvider.Movie.KEY_VOTE_AVERAGE, MovieProvider.Movie.KEY_RUNTIME
+        };
+
+        // get all movies in db
+        Cursor c = getActivity().getContentResolver().query(MovieProvider.MOVIES_CONTENT_URI, projection, null, null, null);
+        MovieModel tmpMovie;
+        if(c != null && c.getCount() > 0) {
+            mMovies.clear();
+            while (c.moveToNext()) {
+                tmpMovie = new MovieModel();
+                tmpMovie.setId(c.getInt(c.getColumnIndex(MovieProvider.Movie.KEY_ID)));
+                tmpMovie.setOverview(c.getString(c.getColumnIndex(MovieProvider.Movie.KEY_OVERVIEW)));
+                tmpMovie.setRelease_date(c.getString(c.getColumnIndex(MovieProvider.Movie.KEY_RELEASE_DATE)));
+                tmpMovie.setPoster_path(c.getString(c.getColumnIndex(MovieProvider.Movie.KEY_POSTER_PATH)));
+                tmpMovie.setTitle(c.getString(c.getColumnIndex(MovieProvider.Movie.KEY_TITLE)));
+                tmpMovie.setVote_average(c.getDouble(c.getColumnIndex(MovieProvider.Movie.KEY_VOTE_AVERAGE)));
+                tmpMovie.setRuntime(c.getInt(c.getColumnIndex(MovieProvider.Movie.KEY_RUNTIME)));
+                mMovies.add(tmpMovie);
+            }
+            c.close();
+            mAdapter.notifyDataSetChanged();
+        }
+
+    }
 
     public interface ClickCallback {
         /**

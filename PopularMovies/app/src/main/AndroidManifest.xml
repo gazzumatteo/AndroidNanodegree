@@ -27,6 +27,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.duckma.popularmovies.MainActivity" />
         </activity>
+
+        <provider
+            android:authorities="@string/authority"
+            android:name=".provider.MovieProvider"
+            android:exported="false"/>
     </application>
 
 </manifest>

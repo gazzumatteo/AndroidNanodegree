@@ -2,6 +2,9 @@
     <string name="app_name">Pop Movies</string>
     <string name="action_filter_popular">Most Popular</string>
     <string name="action_filter_rated">Highest Rated</string>
+    <string name="action_filter_favorites"> Favorites</string>
     <string name="title_movie_detail">Movie Detail</string>
     <string name="btn_favorite">MARK AS \nFAVORITE</string>
+    <string name="btn_favorite_remove">REMOVE\nFAVORITE</string>
+    <string name="authority">com.duckma.popularmovies.movies</string>
 </resources>
