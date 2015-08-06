@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.duckma.popularmovies.adapters.MovieAdapter;
 import com.duckma.popularmovies.models.MovieModel;
@@ -167,6 +168,8 @@ public class MainActivityFragment extends Fragment implements NetworkListAsyncTa
             }
             c.close();
             mAdapter.notifyDataSetChanged();
+        } else {
+            Toast.makeText(getActivity(), "No Favorites, try to add one.", Toast.LENGTH_SHORT).show();
         }
 
     }
