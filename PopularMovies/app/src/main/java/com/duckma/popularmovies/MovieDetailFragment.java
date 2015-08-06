@@ -7,6 +7,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -42,6 +45,7 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
     ArrayList<DetailModel> mDetailObjects = new ArrayList<>();
     MovieDetailAdapter mAdapter;
     RestAdapter mRestAdapter;
+    DetailModel videoToShareDetail;
 
 
     public MovieDetailFragment() {
@@ -51,6 +55,7 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setHasOptionsMenu(true);
         if (savedInstanceState == null && getArguments().containsKey(ARG_ITEM_ID)) {
             mMovieId = getArguments().getInt(ARG_ITEM_ID);
             new NetworkDetailAsyncTask(this).execute(String.valueOf(mMovieId));
@@ -89,6 +94,7 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
             @Override
             public void success(DetailModelCall detailModelCall, Response response) {
                 if (detailModelCall.getResults().size() > 0) {
+                    videoToShareDetail = detailModelCall.getResults().get(0);
                     // Add Separator
                     addSeparator("Trailers");
                     for (DetailModel trailer : detailModelCall.getResults()) {
@@ -199,7 +205,8 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
         Picasso.with(getActivity()).load(mMovie.getPoster_path())
                 .placeholder(R.drawable.placeholder)
                 .into(ivMoviePoster);
-        tvYear.setText(mMovie.getRelease_date().substring(0, 4));
+        if (!mMovie.getRelease_date().isEmpty())
+            tvYear.setText(mMovie.getRelease_date().substring(0, 4));
         if (mMovie.getRuntime() > -1)
             tvMovieLength.setText(mMovie.getRuntime() + " min");
         tvMovieScore.setText(String.valueOf(mMovie.getVote_average()) + "/10");
@@ -217,18 +224,41 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
 
     private void displayReview(DetailModel detail) {
 
-        AlertDialog.Builder builder1 = new AlertDialog.Builder(getActivity());
-        builder1.setTitle(detail.getAuthor());
-        builder1.setMessage(detail.getContent());
-        builder1.setCancelable(true);
-        builder1.setPositiveButton("Ok",
+        AlertDialog.Builder AlertBuilder = new AlertDialog.Builder(getActivity());
+        AlertBuilder.setTitle(detail.getAuthor());
+        AlertBuilder.setMessage(detail.getContent());
+        AlertBuilder.setCancelable(true);
+        AlertBuilder.setPositiveButton("Ok",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
                     }
                 });
 
-        AlertDialog alert11 = builder1.create();
-        alert11.show();
+        AlertDialog alertDialog = AlertBuilder.create();
+        alertDialog.show();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        // Inflate the menu; this adds items to the action bar if it is present.
+        inflater.inflate(R.menu.menu_detail, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        int id = item.getItemId();
+        if (id == R.id.action_share) {
+            if (videoToShareDetail != null) {
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, "http://www.youtube.com/watch?v=" + videoToShareDetail.getKey());
+                startActivity(Intent.createChooser(sendIntent, "Share URL"));
+            }
+            return true;
+        }
+        return false;
     }
 }
