@@ -21,3 +21,15 @@
     **[] $VALUES;
     public *;
 }
+
+# SIMPLE PROVIDER
+# Keep the nested structure
+-keepattributes InnerClasses
+
+# Don't obfuscate the FieldType enum as those values are added
+# to the CREATE TABLE statement directly
+-keep enum de.triplet.simpleprovider.Column$FieldType { public *; }
+
+# Do not obfuscate anything that is annotated with @Table or @Column
+-keep @de.triplet.simpleprovider.Table class * { @de.triplet.simpleprovider.Column *; }
+#END SIMPLE PROVIDER
