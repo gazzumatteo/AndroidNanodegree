@@ -50,12 +50,17 @@ public class NetworkListAsyncTask extends AsyncTask<String, Integer, ArrayList<M
              *  CALL TO WS TO RETRIEVE MOVIES. BETTER TO USE VOLLEY OR RETROFIT
              */
             URL url = new URL(Config.BASE_URL + Config.DISCOVER_PATH + "?" + params[0] + "&api_key=" + Config.TMDB_API_KEY);
-            Log.d("DEBUG",Config.BASE_URL + Config.DISCOVER_PATH + "?" + params[0] + "&api_key=" + Config.TMDB_API_KEY);
+            Log.d("DEBUG", Config.BASE_URL + Config.DISCOVER_PATH + "?" + params[0] + "&api_key=" + Config.TMDB_API_KEY);
 
             // Create the request to OpenWeatherMap, and open the connection
             mUrlConnection = (HttpURLConnection) url.openConnection();
             mUrlConnection.setRequestMethod("GET");
             mUrlConnection.connect();
+            Log.d("code", "code: " + mUrlConnection.getResponseCode());
+            if (mUrlConnection.getResponseCode() != 200) {
+
+                return null;
+            }
 
             // Read the input stream into a String
             InputStream inputStream = mUrlConnection.getInputStream();
@@ -84,6 +89,7 @@ public class NetworkListAsyncTask extends AsyncTask<String, Integer, ArrayList<M
             // If the code didn't successfully get the weather data, there's no point in attempting
             // to parse it.
             moviesJsonStr = null;
+            return null;
         } finally {
             if (mUrlConnection != null) {
                 mUrlConnection.disconnect();
@@ -96,40 +102,41 @@ public class NetworkListAsyncTask extends AsyncTask<String, Integer, ArrayList<M
                 }
             }
         }
-        if (moviesJsonStr != null) {
-            // PARSING, BETTER TO USE GSON, BUT ONLY TO DEMOSTRATE HOW TO PARSE.
-            try {
-                JSONObject result = new JSONObject(moviesJsonStr);
-                JSONArray movies = result.getJSONArray("results");
-                for (int i = 0; i < movies.length(); i++) {
-                    JSONObject movie = (JSONObject) movies.get(i);
-                    MovieModel movieModel = new MovieModel();
-                    movieModel.setAdult(movie.getBoolean("adult"));
-                    movieModel.setBackdrop_path(movie.getString("backdrop_path"));
-                    movieModel.setId(movie.getInt("id"));
-                    movieModel.setOriginal_language(movie.getString("original_language"));
-                    movieModel.setOriginal_title(movie.getString("original_title"));
-                    movieModel.setOverview(movie.getString("overview"));
-                    movieModel.setRelease_date(movie.getString("release_date"));
-                    movieModel.setPoster_path(movie.getString("poster_path"));
-                    movieModel.setPopularity(movie.getDouble("popularity"));
-                    movieModel.setTitle(movie.getString("title"));
-                    movieModel.setVideo(movie.getBoolean("video"));
-                    movieModel.setVote_average(movie.getDouble("vote_average"));
-                    movieModel.setVote_count(movie.getInt("vote_count"));
 
-                    mMovies.add(movieModel);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
+        // PARSING, BETTER TO USE GSON, BUT ONLY TO DEMOSTRATE HOW TO PARSE.
+        try {
+            JSONObject result = new JSONObject(moviesJsonStr);
+            JSONArray movies = result.getJSONArray("results");
+            for (int i = 0; i < movies.length(); i++) {
+                JSONObject movie = (JSONObject) movies.get(i);
+                MovieModel movieModel = new MovieModel();
+                movieModel.setAdult(movie.getBoolean("adult"));
+                movieModel.setBackdrop_path(movie.getString("backdrop_path"));
+                movieModel.setId(movie.getInt("id"));
+                movieModel.setOriginal_language(movie.getString("original_language"));
+                movieModel.setOriginal_title(movie.getString("original_title"));
+                movieModel.setOverview(movie.getString("overview"));
+                movieModel.setRelease_date(movie.getString("release_date"));
+                movieModel.setPoster_path(movie.getString("poster_path"));
+                movieModel.setPopularity(movie.getDouble("popularity"));
+                movieModel.setTitle(movie.getString("title"));
+                movieModel.setVideo(movie.getBoolean("video"));
+                movieModel.setVote_average(movie.getDouble("vote_average"));
+                movieModel.setVote_count(movie.getInt("vote_count"));
+
+                mMovies.add(movieModel);
             }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
+
         return mMovies;
     }
 
     @Override
     protected void onPostExecute(ArrayList<MovieModel> movieModels) {
-        networkDoneListener.OnNetworkDone(movieModels);
+        if (movieModels != null && movieModels.size() > 0)
+            networkDoneListener.OnNetworkDone(movieModels);
     }
 
     public interface NetworkDoneListener {

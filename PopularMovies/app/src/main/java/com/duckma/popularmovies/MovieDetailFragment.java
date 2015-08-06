@@ -299,7 +299,7 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
         Picasso.with(getActivity()).load(mMovie.getPoster_path())
                 .placeholder(R.drawable.placeholder)
                 .into(ivMoviePoster);
-        if (!mMovie.getRelease_date().isEmpty())
+        if (mMovie.getRelease_date() != null && !mMovie.getRelease_date().isEmpty())
             tvYear.setText(mMovie.getRelease_date().substring(0, 4));
         if (mMovie.getRuntime() > -1)
             tvMovieLength.setText(mMovie.getRuntime() + " min");

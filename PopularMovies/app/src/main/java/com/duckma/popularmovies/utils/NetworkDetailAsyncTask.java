@@ -80,6 +80,7 @@ public class NetworkDetailAsyncTask extends AsyncTask<String, Integer, MovieMode
             // If the code didn't successfully get the weather data, there's no point in attempting
             // to parse it.
             moviesJsonStr = null;
+            return null;
         } finally {
             if (mUrlConnection != null) {
                 mUrlConnection.disconnect();
@@ -93,36 +94,37 @@ public class NetworkDetailAsyncTask extends AsyncTask<String, Integer, MovieMode
             }
         }
         MovieModel movieModel = new MovieModel();
-        if (moviesJsonStr != null) {
-            // PARSING, BETTER TO USE GSON, BUT ONLY TO DEMOSTRATE HOW TO PARSE.
-            try {
-                JSONObject movie = new JSONObject(moviesJsonStr);
 
-                movieModel.setAdult(movie.getBoolean("adult"));
-                movieModel.setBackdrop_path(movie.getString("backdrop_path"));
-                movieModel.setId(movie.getInt("id"));
-                movieModel.setOriginal_language(movie.getString("original_language"));
-                movieModel.setOriginal_title(movie.getString("original_title"));
-                movieModel.setOverview(movie.getString("overview"));
-                movieModel.setRelease_date(movie.getString("release_date"));
-                movieModel.setPoster_path(movie.getString("poster_path"));
-                movieModel.setPopularity(movie.getDouble("popularity"));
-                movieModel.setTitle(movie.getString("title"));
-                movieModel.setVideo(movie.getBoolean("video"));
-                movieModel.setVote_average(movie.getDouble("vote_average"));
-                movieModel.setVote_count(movie.getInt("vote_count"));
-                movieModel.setRuntime(movie.getInt("runtime"));
+        // PARSING, BETTER TO USE GSON, BUT ONLY TO DEMOSTRATE HOW TO PARSE.
+        try {
+            JSONObject movie = new JSONObject(moviesJsonStr);
 
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            movieModel.setAdult(movie.getBoolean("adult"));
+            movieModel.setBackdrop_path(movie.getString("backdrop_path"));
+            movieModel.setId(movie.getInt("id"));
+            movieModel.setOriginal_language(movie.getString("original_language"));
+            movieModel.setOriginal_title(movie.getString("original_title"));
+            movieModel.setOverview(movie.getString("overview"));
+            movieModel.setRelease_date(movie.getString("release_date"));
+            movieModel.setPoster_path(movie.getString("poster_path"));
+            movieModel.setPopularity(movie.getDouble("popularity"));
+            movieModel.setTitle(movie.getString("title"));
+            movieModel.setVideo(movie.getBoolean("video"));
+            movieModel.setVote_average(movie.getDouble("vote_average"));
+            movieModel.setVote_count(movie.getInt("vote_count"));
+            movieModel.setRuntime(movie.getInt("runtime"));
+
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
+        
         return movieModel;
     }
 
     @Override
     protected void onPostExecute(MovieModel movie) {
-        networkDoneListener.OnNetworkDone(movie);
+        if (movie != null)
+            networkDoneListener.OnNetworkDone(movie);
     }
 
     public interface NetworkDoneListener {

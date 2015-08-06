@@ -12,6 +12,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
     MainActivityFragment mMainFragment;
 
     private boolean mTwoPane;
+    private boolean mInFavorite;
+    private Menu mMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +65,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
+        // Inflate the menu this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        this.mMenu = menu;
         return true;
     }
 
@@ -74,17 +77,25 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         int id = item.getItemId();
         if (id == R.id.action_filter_popular) {
             new NetworkListAsyncTask(mMainFragment).execute("sort_by=popularity.desc");
+            mInFavorite = false;
             return true;
         }
         if (id == R.id.action_filter_rated) {
+            mInFavorite = false;
             new NetworkListAsyncTask(mMainFragment).execute("sort_by=vote_average.desc");
             return true;
         }
 
         if (id == R.id.action_filter_favorites) {
-            if(mMainFragment.isVisible())
-                mMainFragment.loadFavorites();
-            return true;
+            if (mInFavorite) {
+                onOptionsItemSelected(mMenu.findItem(R.id.action_filter_popular));
+            } else {
+                if (mMainFragment.isVisible()) {
+                    mInFavorite = true;
+                    mMainFragment.loadFavorites();
+                }
+                return true;
+            }
         }
 
         return super.onOptionsItemSelected(item);
