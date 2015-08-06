@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,6 +20,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.duckma.popularmovies.adapters.MovieDetailAdapter;
 import com.duckma.popularmovies.api.DetailModelCall;
@@ -76,6 +78,7 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
 
     private void getMovieFromContentProvider() {
         mMovie = new MovieModel();
+        Uri movieUri = Uri.withAppendedPath(MovieProvider.MOVIES_CONTENT_URI, String.valueOf(mMovieId));
         String[] projection = {MovieProvider.Movie.KEY_ID,
                 MovieProvider.Movie.KEY_OVERVIEW, MovieProvider.Movie.KEY_RELEASE_DATE,
                 MovieProvider.Movie.KEY_POSTER_PATH, MovieProvider.Movie.KEY_TITLE,
@@ -83,7 +86,7 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
         };
 
         // get all movies in db
-        Cursor c = getActivity().getContentResolver().query(MovieProvider.MOVIES_CONTENT_URI, projection, null, null, null);
+        Cursor c = getActivity().getContentResolver().query(movieUri, projection, null, null, null);
         if (c != null && c.getCount() > 0) {
             c.moveToNext();
             mMovie.setId(c.getInt(c.getColumnIndex(MovieProvider.Movie.KEY_ID)));
@@ -96,6 +99,32 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
             c.close();
         }
 
+        // get all the details
+        String[] detailsProjection = {MovieProvider.MovieDetail.KEY_ID,
+                MovieProvider.MovieDetail.KEY_MOVIE_ID,MovieProvider.MovieDetail.KEY_CONTENT_TYPE,
+                MovieProvider.MovieDetail.KEY_KEY,MovieProvider.MovieDetail.KEY_NAME,
+                MovieProvider.MovieDetail.KEY_SITE,MovieProvider.MovieDetail.KEY_AUTHOR,
+                MovieProvider.MovieDetail.KEY_CONTENT
+        };
+
+        // get all movie details in db
+        c = getActivity().getContentResolver().query(MovieProvider.MOVIE_DETAILS_CONTENT_URI, detailsProjection, MovieProvider.MovieDetail.KEY_MOVIE_ID + "=" + mMovie.getId(), null, null);
+        if(c!= null && c.getCount() > 0) {
+            DetailModel detailModel;
+            mDetailObjects.clear();
+            while (c.moveToNext()){
+                detailModel = new DetailModel();
+                detailModel.setContentType(c.getInt(c.getColumnIndex(MovieProvider.MovieDetail.KEY_CONTENT_TYPE)));
+                detailModel.setKey(c.getString(c.getColumnIndex(MovieProvider.MovieDetail.KEY_KEY)));
+                detailModel.setName(c.getString(c.getColumnIndex(MovieProvider.MovieDetail.KEY_NAME)));
+                detailModel.setSite(c.getString(c.getColumnIndex(MovieProvider.MovieDetail.KEY_SITE)));
+                detailModel.setAuthor(c.getString(c.getColumnIndex(MovieProvider.MovieDetail.KEY_AUTHOR)));
+                detailModel.setContent(c.getString(c.getColumnIndex(MovieProvider.MovieDetail.KEY_CONTENT)));
+                mDetailObjects.add(detailModel);
+            }
+            c.close();
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -122,8 +151,8 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
                 mAdapter.notifyDataSetChanged();
             }
         } else {
-            //TODO: check if is favourite
-            getTrailers();
+            if (!mIsFavorite)
+                getTrailers();
         }
     }
 
@@ -195,7 +224,7 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
         mListView = (ListView) rootView.findViewById(R.id.lvMovieTrailers);
 
         mAdapter = new MovieDetailAdapter(getActivity(), mDetailObjects);
-        mListView.setAdapter(mAdapter);
+
 
         if (mMovieId != -1) {
             View header = getActivity().getLayoutInflater().inflate(R.layout.movie_detail_header, null);
@@ -216,6 +245,7 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
             mListView.addHeaderView(header);
         }
 
+        mListView.setAdapter(mAdapter);
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -243,14 +273,19 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
 
     // TODO Add Details
     private void addRemoveMovieToFavorites() {
-        Uri movieUri = Uri.withAppendedPath(MovieProvider.MOVIES_CONTENT_URI, String.valueOf(mMovieId));
+        Uri movieUri = Uri.withAppendedPath(MovieProvider.MOVIES_CONTENT_URI, String.valueOf(mMovie.getId()));
 
         if (mIsFavorite) { // present in db, remove it
             int count = getActivity().getContentResolver().delete(movieUri, null, null);
             if (count > 0) {
+                Toast.makeText(getActivity(), "Successfully removed from Favorites", Toast.LENGTH_SHORT).show();
                 mBtnFavorite.setText(getResources().getString(R.string.btn_favorite));
                 mIsFavorite = false;
             }
+
+            // remove all the details
+            count = getActivity().getContentResolver().delete(MovieProvider.MOVIE_DETAILS_CONTENT_URI, MovieProvider.MovieDetail.KEY_MOVIE_ID + "=" + mMovie.getId(), null);
+            Log.d("Temov", "Removed " + count);
         } else { // insert in db
             ContentValues mMovieValues = new ContentValues();
             mMovieValues.put(MovieProvider.Movie.KEY_ID, mMovie.getId());
@@ -263,8 +298,24 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
 
             movieUri = getActivity().getContentResolver().insert(MovieProvider.MOVIES_CONTENT_URI, mMovieValues);
             if (movieUri != null) {
-                mIsFavorite = false;
+                mIsFavorite = true;
+                Toast.makeText(getActivity(), "Successfully added to Favorites", Toast.LENGTH_SHORT).show();
                 mBtnFavorite.setText(getResources().getString(R.string.btn_favorite_remove));
+            }
+
+            ContentValues mMovieDetailValues;
+            // Add Movie Details to db
+            for (DetailModel detailModel : mDetailObjects) {
+                mMovieDetailValues = new ContentValues();
+                mMovieDetailValues.put(MovieProvider.MovieDetail.KEY_MOVIE_ID, mMovieId);
+                mMovieDetailValues.put(MovieProvider.MovieDetail.KEY_CONTENT_TYPE, detailModel.getContentType());
+                mMovieDetailValues.put(MovieProvider.MovieDetail.KEY_KEY, detailModel.getKey());
+                mMovieDetailValues.put(MovieProvider.MovieDetail.KEY_NAME, detailModel.getName());
+                mMovieDetailValues.put(MovieProvider.MovieDetail.KEY_SITE, detailModel.getSite());
+                mMovieDetailValues.put(MovieProvider.MovieDetail.KEY_AUTHOR, detailModel.getAuthor());
+                mMovieDetailValues.put(MovieProvider.MovieDetail.KEY_CONTENT, detailModel.getContent());
+
+                getActivity().getContentResolver().insert(MovieProvider.MOVIE_DETAILS_CONTENT_URI, mMovieDetailValues);
             }
         }
     }

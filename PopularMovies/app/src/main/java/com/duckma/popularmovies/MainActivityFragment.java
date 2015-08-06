@@ -45,7 +45,7 @@ public class MainActivityFragment extends Fragment implements NetworkListAsyncTa
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         // Restore the previously serialized activated item position.
-        if (savedInstanceState != null) {
+        if (savedInstanceState != null && savedInstanceState.containsKey(BUNDLE_ITEM)) {
             mMovies = (ArrayList<MovieModel>) savedInstanceState.getSerializable(BUNDLE_ITEM);
             if (savedInstanceState.containsKey(STATE_ACTIVATED_POSITION))
                 setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
@@ -97,7 +97,6 @@ public class MainActivityFragment extends Fragment implements NetworkListAsyncTa
         mCallbacks = sDummyCallbacks;
     }
 
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -144,7 +143,7 @@ public class MainActivityFragment extends Fragment implements NetworkListAsyncTa
     };
 
     public void loadFavorites() {
-        String[] projection = { MovieProvider.Movie.KEY_ID,
+        String[] projection = {MovieProvider.Movie.KEY_ID,
                 MovieProvider.Movie.KEY_OVERVIEW, MovieProvider.Movie.KEY_RELEASE_DATE,
                 MovieProvider.Movie.KEY_POSTER_PATH, MovieProvider.Movie.KEY_TITLE,
                 MovieProvider.Movie.KEY_VOTE_AVERAGE, MovieProvider.Movie.KEY_RUNTIME
@@ -153,7 +152,7 @@ public class MainActivityFragment extends Fragment implements NetworkListAsyncTa
         // get all movies in db
         Cursor c = getActivity().getContentResolver().query(MovieProvider.MOVIES_CONTENT_URI, projection, null, null, null);
         MovieModel tmpMovie;
-        if(c != null && c.getCount() > 0) {
+        if (c != null && c.getCount() > 0) {
             mMovies.clear();
             while (c.moveToNext()) {
                 tmpMovie = new MovieModel();
