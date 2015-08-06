@@ -8,7 +8,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,7 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -46,7 +45,8 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
     private int mMovieId;
     TextView tvMovieTitle, tvYear, tvMovieLength, tvMovieScore, tvMovieDescription;
     ImageView ivMoviePoster;
-    Button mBtnFavorite;
+    ImageButton mBtnFavorite;
+    TextView mTvFavorites;
     MovieModel mMovie;
     ListView mListView;
     ArrayList<DetailModel> mDetailObjects = new ArrayList<>();
@@ -234,8 +234,8 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
             tvMovieLength = (TextView) header.findViewById(R.id.tvMovieLength);
             tvMovieScore = (TextView) header.findViewById(R.id.tvMovieScore);
             tvMovieDescription = (TextView) header.findViewById(R.id.tvMovieDescription);
-            mBtnFavorite = (Button) header.findViewById(R.id.btnFavorite);
-
+            mBtnFavorite = (ImageButton) header.findViewById(R.id.btnFavorite);
+            mTvFavorites = (TextView) header.findViewById(R.id.tvFavorite);
             mBtnFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -279,13 +279,13 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
             int count = getActivity().getContentResolver().delete(movieUri, null, null);
             if (count > 0) {
                 Toast.makeText(getActivity(), "Successfully removed from Favorites", Toast.LENGTH_SHORT).show();
-                mBtnFavorite.setText(getResources().getString(R.string.btn_favorite));
+                mTvFavorites.setText(getResources().getString(R.string.btn_favorite));
+                mBtnFavorite.setImageResource(android.R.drawable.star_big_off);
                 mIsFavorite = false;
             }
 
             // remove all the details
             count = getActivity().getContentResolver().delete(MovieProvider.MOVIE_DETAILS_CONTENT_URI, MovieProvider.MovieDetail.KEY_MOVIE_ID + "=" + mMovie.getId(), null);
-            Log.d("Temov", "Removed " + count);
         } else { // insert in db
             ContentValues mMovieValues = new ContentValues();
             mMovieValues.put(MovieProvider.Movie.KEY_ID, mMovie.getId());
@@ -300,7 +300,8 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
             if (movieUri != null) {
                 mIsFavorite = true;
                 Toast.makeText(getActivity(), "Successfully added to Favorites", Toast.LENGTH_SHORT).show();
-                mBtnFavorite.setText(getResources().getString(R.string.btn_favorite_remove));
+                mTvFavorites.setText(getResources().getString(R.string.btn_favorite_remove));
+                mBtnFavorite.setImageResource(android.R.drawable.star_big_on);
             }
 
             ContentValues mMovieDetailValues;
@@ -357,10 +358,13 @@ public class MovieDetailFragment extends Fragment implements NetworkDetailAsyncT
         tvMovieScore.setText(String.valueOf(mMovie.getVote_average()) + "/10");
         tvMovieDescription.setText(mMovie.getOverview());
 
-        if (mIsFavorite)
-            mBtnFavorite.setText(getResources().getString(R.string.btn_favorite_remove));
-        else
-            mBtnFavorite.setText(getResources().getString(R.string.btn_favorite));
+        if (mIsFavorite) {
+            mTvFavorites.setText(getResources().getString(R.string.btn_favorite_remove));
+            mBtnFavorite.setImageResource(android.R.drawable.star_big_on);
+        } else {
+            mTvFavorites.setText(getResources().getString(R.string.btn_favorite));
+            mBtnFavorite.setImageResource(android.R.drawable.star_big_off);
+        }
     }
 
     @Override
