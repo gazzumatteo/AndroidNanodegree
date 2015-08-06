@@ -1,11 +1,13 @@
 package com.duckma.popularmovies.models;
 
+import java.io.Serializable;
+
 /**
  * Copyright © 2015 DuckMa S.r.l. - http://duckma.com
  * <p/>
  * Created by Matteo Gazzurelli on 01/08/15.
  */
-public class DetailModel {
+public class DetailModel implements Serializable {
     public static final int TYPE_TRAILER = 0;
     public static final int TYPE_REVIEW = 1;
     public static final int TYPE_SEPARATOR = 2;
