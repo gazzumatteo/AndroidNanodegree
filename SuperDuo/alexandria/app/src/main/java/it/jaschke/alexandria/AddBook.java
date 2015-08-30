@@ -1,25 +1,31 @@
 package it.jaschke.alexandria;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
+import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-
+import it.jaschke.alexandria.cameraPreview.CameraPreviewActivity;
 import it.jaschke.alexandria.data.AlexandriaContract;
 import it.jaschke.alexandria.services.BookService;
 import it.jaschke.alexandria.services.DownloadImage;
@@ -29,8 +35,11 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
     private static final String TAG = "INTENT_TO_SCAN_ACTIVITY";
     private EditText ean;
     private final int LOADER_ID = 1;
+    private static final int PERMISSION_REQUEST = 9;
+    public static final int SCAN_CODE = 101;
+
     private View rootView;
-    private final String EAN_CONTENT="eanContent";
+    private final String EAN_CONTENT = "eanContent";
     private static final String SCAN_FORMAT = "scanFormat";
     private static final String SCAN_CONTENTS = "scanContents";
 
@@ -38,17 +47,18 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
     private String mScanContents = "Contents:";
 
 
-
-    public AddBook(){
+    public AddBook() {
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(ean!=null) {
+        if (ean != null) {
             outState.putString(EAN_CONTENT, ean.getText().toString());
         }
     }
+
+    // BUG! 9781234567897
 
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -69,14 +79,14 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
 
             @Override
             public void afterTextChanged(Editable s) {
-                String ean =s.toString();
-                //catch isbn10 numbers
-                if(ean.length()==10 && !ean.startsWith("978")){
-                    ean="978"+ean;
-                }
-                if(ean.length()<13){
+                String ean = s.toString();
+                if (ean.length() < 13) {
                     clearFields();
                     return;
+                }
+                //catch isbn10 numbers
+                if (ean.length() == 10 && !ean.startsWith("978")) {
+                    ean = "978" + ean;
                 }
                 //Once we have an ISBN, start a book intent
                 Intent bookIntent = new Intent(getActivity(), BookService.class);
@@ -90,19 +100,14 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         rootView.findViewById(R.id.scan_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // This is the callback method that the system will invoke when your button is
-                // clicked. You might do this by launching another app or by including the
-                //functionality directly in this app.
-                // Hint: Use a Try/Catch block to handle the Intent dispatch gracefully, if you
-                // are using an external app.
-                //when you're done, remove the toast below.
-                Context context = getActivity();
-                CharSequence text = "This button should let you scan a book for its barcode!";
-                int duration = Toast.LENGTH_SHORT;
-
-                Toast toast = Toast.makeText(context, text, duration);
-                toast.show();
-
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (getActivity().checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                        requestPermissions(new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST);
+                        return;
+                    }
+                }
+                Intent intent = new Intent(getActivity(), CameraPreviewActivity.class);
+                startActivityForResult(intent, SCAN_CODE);
             }
         });
 
@@ -116,15 +121,35 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         rootView.findViewById(R.id.delete_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent bookIntent = new Intent(getActivity(), BookService.class);
-                bookIntent.putExtra(BookService.EAN, ean.getText().toString());
-                bookIntent.setAction(BookService.DELETE_BOOK);
-                getActivity().startService(bookIntent);
-                ean.setText("");
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+
+                // set title
+                alertDialogBuilder.setTitle(getString(R.string.alert_title));
+
+                // set dialog message
+                alertDialogBuilder
+                        .setMessage(getString(R.string.alert_description))
+                        .setCancelable(false)
+                        .setPositiveButton(getString(android.R.string.yes), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                Intent bookIntent = new Intent(getActivity(), BookService.class);
+                                bookIntent.putExtra(BookService.EAN, ean.getText().toString());
+                                bookIntent.setAction(BookService.DELETE_BOOK);
+                                getActivity().startService(bookIntent);
+                                ean.setText("");
+                            }
+                        })
+                        .setNegativeButton(getString(android.R.string.no), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
             }
         });
 
-        if(savedInstanceState!=null){
+        if (savedInstanceState != null) {
             ean.setText(savedInstanceState.getString(EAN_CONTENT));
             ean.setHint("");
         }
@@ -132,18 +157,18 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         return rootView;
     }
 
-    private void restartLoader(){
+    private void restartLoader() {
         getLoaderManager().restartLoader(LOADER_ID, null, this);
     }
 
     @Override
     public android.support.v4.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        if(ean.getText().length()==0){
+        if (ean.getText().length() == 0) {
             return null;
         }
-        String eanStr= ean.getText().toString();
-        if(eanStr.length()==10 && !eanStr.startsWith("978")){
-            eanStr="978"+eanStr;
+        String eanStr = ean.getText().toString();
+        if (eanStr.length() == 10 && !eanStr.startsWith("978")) {
+            eanStr = "978" + eanStr;
         }
         return new CursorLoader(
                 getActivity(),
@@ -170,9 +195,9 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         String authors = data.getString(data.getColumnIndex(AlexandriaContract.AuthorEntry.AUTHOR));
         String[] authorsArr = authors.split(",");
         ((TextView) rootView.findViewById(R.id.authors)).setLines(authorsArr.length);
-        ((TextView) rootView.findViewById(R.id.authors)).setText(authors.replace(",","\n"));
+        ((TextView) rootView.findViewById(R.id.authors)).setText(authors.replace(",", "\n"));
         String imgUrl = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.IMAGE_URL));
-        if(Patterns.WEB_URL.matcher(imgUrl).matches()){
+        if (Patterns.WEB_URL.matcher(imgUrl).matches()) {
             new DownloadImage((ImageView) rootView.findViewById(R.id.bookCover)).execute(imgUrl);
             rootView.findViewById(R.id.bookCover).setVisibility(View.VISIBLE);
         }
@@ -189,7 +214,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
 
     }
 
-    private void clearFields(){
+    private void clearFields() {
         ((TextView) rootView.findViewById(R.id.bookTitle)).setText("");
         ((TextView) rootView.findViewById(R.id.bookSubTitle)).setText("");
         ((TextView) rootView.findViewById(R.id.authors)).setText("");
@@ -203,5 +228,30 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         activity.setTitle(R.string.scan);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == SCAN_CODE && resultCode == Activity.RESULT_OK && data.hasExtra(CameraPreviewActivity.RAW_RESULT_KEY)) {
+            Log.d(TAG, data.getExtras().getString(CameraPreviewActivity.RAW_RESULT_KEY));
+            ean.setText(data.getExtras().getString(CameraPreviewActivity.RAW_RESULT_KEY));
+            // hide the keyboard
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(ean.getWindowToken(), 0);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case PERMISSION_REQUEST:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Intent intent = new Intent(getActivity(), CameraPreviewActivity.class);
+                    startActivityForResult(intent, SCAN_CODE);
+                }
+                break;
+        }
     }
 }

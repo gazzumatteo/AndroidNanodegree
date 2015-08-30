@@ -6,8 +6,8 @@ package com.duckma.popularmovies;
  * Created by Matteo Gazzurelli on 24/07/15.
  */
 public class Config {
-        private static final String TMDB_API_KEY = "[REPLACE_WITH_YOUR_TMDB_API_KEY]";
-
+    //    private static final String TMDB_API_KEY = "[REPLACE_WITH_YOUR_TMDB_API_KEY]";
+    public static final String TMDB_API_KEY = "faf97e5d5bfa445b8b953a0a7bacd059";
     public static final String BASE_URL = "http://api.themoviedb.org/3";
     public static final String DISCOVER_PATH = "/discover/movie";
     public static final String MOVIE_PATH = "/movie";

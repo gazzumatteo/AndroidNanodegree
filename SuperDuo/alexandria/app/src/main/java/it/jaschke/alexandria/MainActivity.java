@@ -11,7 +11,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,7 +20,7 @@ import android.widget.Toast;
 import it.jaschke.alexandria.api.Callback;
 
 
-public class MainActivity extends ActionBarActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks, Callback {
+public class MainActivity extends AppCompatActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks, Callback {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -47,7 +47,7 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
             setContentView(R.layout.activity_main);
         }
 
-        messageReciever = new MessageReciever();
+        messageReciever = new MessageReceiver();
         IntentFilter filter = new IntentFilter(MESSAGE_EVENT);
         LocalBroadcastManager.getInstance(this).registerReceiver(messageReciever,filter);
 
@@ -92,9 +92,12 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
 
     public void restoreActionBar() {
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(title);
+        if(actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            actionBar.setDisplayShowTitleEnabled(true);
+            actionBar.setTitle(title);
+        }
     }
 
 
@@ -151,7 +154,7 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
 
     }
 
-    private class MessageReciever extends BroadcastReceiver {
+    private class MessageReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.getStringExtra(MESSAGE_KEY)!=null){
